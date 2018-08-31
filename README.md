@@ -6,7 +6,7 @@
 
 Avocado is a multi-scale deep tensor factorization model that is used to learn a latent representation of the human epigenome. The purpose of this model is two fold; first, to impute epigenomic experiments that have not yet been performed, and second, to use the learned latent representation in downstream genomics tasks. The primary project page with links to the full set of imputations can be found at https://noble.gs.washington.edu/proj/avocado/. The manuscript is currently under review at *Nature Methods* but the preprint can be found [here](https://www.biorxiv.org/content/early/2018/07/08/364976).
 
-## Installation
+### Installation
 
 The package can be installed using pip.
 
@@ -14,40 +14,16 @@ The package can be installed using pip.
 pip install avocado-epigenome
 ```
 
-This repository is comprised of multiple parts:
+### What is Avocado?
 
-(1) A Python package, named Avocado, that makes it easy to train such models and use them. The default parameters are those used in the manuscript.
+There have recently been many large-scale efforts to better understand human genomics and epigenomics by assaying as many different biological phenomena in as many different human cell types as possible. Three of these efforts are the [Roadmap Epigenomics Consortium](http://www.roadmapepigenomics.org/), the [Encyclopedia of DNA Elements (ENCODE) Project](https://www.encodeproject.org/), and the [International Human Epigenome Consortium](https://ihec-epigenomes.org/). These consortia collect thousands of tracks of genome-wide measurements that include histone modification and transcription factor binding through chromatin immunoprecipitation followed by sequencing (ChIP-seq) experiments, gene expression through RNA-seq, CAGE, and RAMPAGE experiments, nucleotide methylation through whole genome bisulfide sequencing (WGBS), replication timing through Repli-seq experiments, and others. These measurements are frequently organized as a tensor with three orthogonal axes; the cell types / tissues, the epigenomic assays, and the length of the genome. Unfortunately, these measurements are typically noisy and redundant despite the tensor being extremely sparse with far fewer than 1% of potential experiments having been performed.
 
-(2) Unmodified research scripts in the folder "scripts/" that show most of the important scripts for the manuscript. These scripts will have hard-coded file paths and calls to a SGE cluster that will likely not work on another machine, but are provided for transparency and review. The full set of all scripts used during the course of the project can be found at https://noble.gs.washington.edu/~jmschr/avocado/ with data processing scripts found in "scripts/" and exploratory code / results found in various folders under "exps/". 
+Avocado is a multi-scale deep tensor factorization model that factorizes this tensor of epigenomic data such that it learns latent representations of the modeled cell types, epigenomic assays, and genomic positions. It is multi-scale because it represents the genome axis using three resolutions; 25 bp, 250 bp, and 5 kbp. It is deep because it replaces the generalized dot product used in a factorization approach with a deep neural network and jointly trains the latent factors and the network weights. Avocado is trained on the task of imputing epigenomic experiments and so the latent factors learn representations of each axis that embed important genomic phenomena while the neural network learns weights that can combine these latent factors in such a manner as to predict the signal value of an epigenomic assay in a specific cell type at genomic position.
 
-(3) A Jupyter notebook named "Avocado Training Demo.ipynb" that contains a demonstration of how to train a scaled down version of the model using a CPU on a subset of data, use a trained model to impute experiments not in the training set, and how to extract the latent representation. The data is a subset of the Roadmap compendium, consisting of 25 experiments from 5 cell types and 5 assays, restricted to the ENCODE Pilot Regions. The data can be found as arrays in the file format "data/{celltype}.{assay}.pilot.arcsinh.npz". A .html version of the notebook is also provided as "Avocado Training Demo.html" that is read-only.
+<p align="center">
+	<img src="figures/Avocado-Schematic.gif" width="650"/>
+</p>
 
-(4) A Jupyter notebook named "Avocado Downstream Task Demo.ipynb" that contains a demonstration on how to evaluate various feature sets at downstream genomics tasks. This example contains pre-extracted data from the Roadmap compendium, ChromImpute/PREDICTD/Avocado imputed measurements, and the Avocado latent factors for the prediction of gene expression in IMR90.
+### What can Avocado do?
 
-1) System Requirements
 
-This code has been tested on a Ubuntu 16.04 machine running 2.7.14 (64-bit). However, it should run on any machine that has Python 2.7 installed.
-
-The following Python packages are required and have been tested:
-
-IPython     5.4.1
-pandas      0.21.1
-numpy       1.14.2
-keras       2.0.8
-theano      1.0.1
-sklearn     0.19.1
-joblib      0.11
-tqdm        4.19.4
-xgboost     0.7
-matplotlib  2.1.2
-seaborn     0.8.1
-
-A GPU is not required to run the demo code, but will significantly speed it up. Many GPUs were used to train the full Avocado model.
-
-2) Installation Guide
-
-A call to `python setup.py install` should install the required dependencies. The installation of all packages, should the user have none, should not exceed 10 minutes given a standard internet connection (1 Mb/s).
-
-3) Demo and Instructions for Use
-
-Please see the "Avocado Training Demo.html" and "Avocado Downstream Task Demo.html" for demonstrations with narrative text of how to define and train a model, and how to use the extracted latent factors on a downstream genomics task. Given that training the model presented in the manuscript required multiple GPUs on hundreds of gigabytes of data, we cannot provide instructions for reproducing the quantitative results of the manuscript using this demonstration.

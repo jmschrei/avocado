@@ -21,7 +21,7 @@ There have recently been many large-scale efforts to better understand human gen
 Avocado is a multi-scale deep tensor factorization model that factorizes this tensor of epigenomic data such that it learns latent representations of the modeled cell types, epigenomic assays, and genomic positions. It is multi-scale because it represents the genome axis using three resolutions; 25 bp, 250 bp, and 5 kbp. It is deep because it replaces the generalized dot product used in a factorization approach with a deep neural network and jointly trains the latent factors and the network weights. Avocado is trained on the task of imputing epigenomic experiments and so the latent factors learn representations of each axis that embed important genomic phenomena while the neural network learns weights that can combine these latent factors in such a manner as to predict the signal value of an epigenomic assay in a specific cell type at genomic position.
 
 <p align="center">
-	<img src="figures/Avocado-Schematic.gif" width="650"/>
+	<img src="figures/Avocado-Training.gif" width="650"/>
 </p>
 
 ### What can Avocado do?

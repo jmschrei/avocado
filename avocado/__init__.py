@@ -8,4 +8,4 @@ of the human epigenome. This package contains tools to implement the model and
 use it yourself.
 """
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'

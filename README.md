@@ -4,7 +4,15 @@
 	<img src="figures/Avocado-Schematic.png" width="650"/>
 </p>
 
-Avocado is a multi-scale deep tensor factorization model that is used to learn a latent representation of the human epigenome. The purpose of this model is two fold; first, to impute epigenomic experiments that have not yet been performed, and second, to use the learned latent representation in downstream genomics tasks. The primary project page can be found at https://noble.gs.washington.edu/proj/avocado/ 
+Avocado is a multi-scale deep tensor factorization model that is used to learn a latent representation of the human epigenome. The purpose of this model is two fold; first, to impute epigenomic experiments that have not yet been performed, and second, to use the learned latent representation in downstream genomics tasks. The primary project page with links to the full set of imputations can be found at https://noble.gs.washington.edu/proj/avocado/. The manuscript is currently under review at *Nature Methods* but the preprint can be found [here](https://www.biorxiv.org/content/early/2018/07/08/364976).
+
+## Installation
+
+The package can be installed using pip.
+
+```
+pip install avocado-epigenome
+```
 
 This repository is comprised of multiple parts:
 

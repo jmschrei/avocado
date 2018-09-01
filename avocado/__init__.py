@@ -8,4 +8,6 @@ of the human epigenome. This package contains tools to implement the model and
 use it yourself.
 """
 
+from .model import Avocado
+
 __version__ = '0.2.0'

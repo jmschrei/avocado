@@ -14,16 +14,60 @@ The package can be installed using pip.
 pip install avocado-epigenome
 ```
 
-### What is Avocado?
-
-There have recently been many large-scale efforts to better understand human genomics and epigenomics by assaying as many different biological phenomena in as many different human cell types as possible. Three of these efforts are the [Roadmap Epigenomics Consortium](http://www.roadmapepigenomics.org/), the [Encyclopedia of DNA Elements (ENCODE) Project](https://www.encodeproject.org/), and the [International Human Epigenome Consortium](https://ihec-epigenomes.org/). These consortia collect thousands of tracks of genome-wide measurements that include histone modification and transcription factor binding through chromatin immunoprecipitation followed by sequencing (ChIP-seq) experiments, gene expression through RNA-seq, CAGE, and RAMPAGE experiments, nucleotide methylation through whole genome bisulfide sequencing (WGBS), replication timing through Repli-seq experiments, and others. These measurements are frequently organized as a tensor with three orthogonal axes; the cell types / tissues, the epigenomic assays, and the length of the genome. Unfortunately, these measurements are typically noisy and redundant despite the tensor being extremely sparse with far fewer than 1% of potential experiments having been performed.
-
-Avocado is a multi-scale deep tensor factorization model that factorizes this tensor of epigenomic data such that it learns latent representations of the modeled cell types, epigenomic assays, and genomic positions. It is multi-scale because it represents the genome axis using three resolutions; 25 bp, 250 bp, and 5 kbp. It is deep because it replaces the generalized dot product used in a factorization approach with a deep neural network and jointly trains the latent factors and the network weights. Avocado is trained on the task of imputing epigenomic experiments and so the latent factors learn representations of each axis that embed important genomic phenomena while the neural network learns weights that can combine these latent factors in such a manner as to predict the signal value of an epigenomic assay in a specific cell type at genomic position.
-
-<p align="center">
-	<img src="figures/Avocado-Training.gif" width="650"/>
-</p>
-
 ### What can Avocado do?
 
+Avocado can impute epigenomic experiments that have not yet been performed with higher accuracy than either ChromImpute or PREDICTD, two previous methods. These imputations are at 25 bp resolution and cover the full span of chromosomes 1 through 22. The example below shows the accuracy of Avocado's imputations on one particular track of data as the model trains over 400 epochs.
+
+<p align="center">
+	<img src="figures/Avocado-Training.gif" width="750"/>
+</p>
+
+Avocado's learned latent representation can be used in the place of epigenomic data as input to machine learning models that are predicting some other genomic phenomena, such as promoter-enhancer interactions or chromatin conformation. In almost all cases machine learning models that use the Avocado latent factors outperform those that use epigenomic data from the cell type of interest.
+
+<p align="center">
+	<img src="figures/Avocado-tasks.png" width="750"/>
+</p>
+
+### How can I use Avocado?
+
+Using Avocado is easy! We can create the model just by passing in a list of cell types, a list of assays, and specifying the various hyperparameters.
+
+```python
+from avocado import Avocado
+
+model = Avocado(celltypes, assays, n_layers=1, n_nodes=128, n_assay_factors=24, 
+				n_celltype_factors=32, n_25bp_factors=10, n_250bp_factors=20, 
+				n_5kbp_factors=30, batch_size=10000)
+```
+
+The format of the training data is that of a dictionary where the keys are (cell type, assay) pairs and the value is the corresponding track of epigenomic data.
+
+
+```python
+celltypes = ['E003', 'E017', 'E065', 'E116', 'E117']
+assays = ['H3K4me3', 'H3K27me3', 'H3K36me3', 'H3K9me3', 'H3K4me1']
+
+data = {}
+for celltype, assay in itertools.product(celltypes, assays):
+    filename = 'data/{}.{}.pilot.arcsinh.npz'.format(celltype, assay)
+    data[(celltype, assay)] = numpy.load(filename)['arr_0']
+```
+
+Now you can fit your model to that data for some number of epochs, where an epoch is defined as some number of batches.
+
+```python
+model.fit(data, n_epochs=10, epoch_size=100)
+```
+
+After you're done fitting your model you can then impute any track from the cell types and assays that you trained on. In this case we trained on all tracks, but this can be as dense or sparse as one would like as long as there is at least one example of each cell type and assay.
+
+```python
+track = model.predict("E065", "H3K4me3")
+```
+
+There are currently two tutorials in the form of Jupyter notebooks. One focuses on how to use this code to train an Avocado model, make imputations, and extract the resulting latent factors. The second shows how one might use the latent factors to make predictions in two downstream tasks. 
+
+### Can I add my own cell type and assay to your pre-trained model?
+
+Yes! Because neural networks are flexible it is easy to freeze the existing parameters of the model and add in additional cell types or assays, training only the latent factors corresponding to that cell type or assay. When those latent factors are trained, the model is now able to impute tracks for all assays of the new cell type, or tracks for all cell types given a new assay.
 

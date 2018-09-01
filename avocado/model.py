@@ -11,42 +11,46 @@ factorization model.
 from .io import sequential_data_generator
 from .io import data_generator
 
+import json
 import numpy
+import keras
 
-try:
-	import keras
-	from keras.layers import Input, Embedding, Dense
-	from keras.layers import Multiply, Dot, Flatten, concatenate
-	from keras.models import Model
-	from keras.optimizers import Adam
-except:
-	Input, Embedding, Dense = object, object, object
-	Multiply, Dot, Flatten = object, object, object
-	Model, Adam = object, object
+from keras.layers import Input, Embedding, Dense
+from keras.layers import Multiply, Dot, Flatten, concatenate
+from keras.models import Model
+from keras.optimizers import Adam
+
 
 def build_model(n_celltypes, n_celltype_factors, n_assays, n_assay_factors,
 	n_genomic_positions, n_25bp_factors, n_250bp_factors, n_5kbp_factors,
-	n_layers, n_nodes):
+	n_layers, n_nodes, freeze_celltypes=False, freeze_assays=False,
+	freeze_genome_25bp=False, freeze_genome_250bp=False, 
+	freeze_genome_5kbp=False, freeze_network=False):
 	"""This function builds a multi-scale deep tensor factorization model."""
 
 	celltype_input = Input(shape=(1,), name="celltype")
 	celltype_embedding = Embedding(n_celltypes, n_celltype_factors, input_length=1)(celltype_input)
+	celltype_embedding.trainable = not freeze_celltypes
 	celltype = Flatten()(celltype_embedding)
 
 	assay_input = Input(shape=(1,), name="assay")
 	assay_embedding = Embedding(n_assays, n_assay_factors, input_length=1)
+	assay_embedding.trainable = not freeze_assays
 	assay = Flatten()(assay_embedding(assay_input))
 
 	genome_25bp_input = Input(shape=(1,), name="genome_25bp")
 	genome_25bp_embedding = Embedding(n_genomic_positions, n_25bp_factors, input_length=1)
+	genome_25bp_embedding.trainable = not freeze_genome_25bp
 	genome_25bp = Flatten()(genome_25bp_embedding(genome_25bp_input))
 
 	genome_250bp_input = Input(shape=(1,), name="genome_250bp")
 	genome_250bp_embedding = Embedding((n_genomic_positions / 10) + 1, n_250bp_factors, input_length=1)
+	genome_250bp_embedding.trainable = not freeze_genome_250bp
 	genome_250bp = Flatten()(genome_250bp_embedding(genome_250bp_input))
 
 	genome_5kbp_input = Input(shape=(1,), name="genome_5kbp")
 	genome_5kbp_embedding = Embedding((n_genomic_positions / 200) + 1, n_5kbp_factors, input_length=1)
+	genome_5kbp_embedding.trainable = not freeze_genome_5kbp
 	genome_5kbp = Flatten()(genome_5kbp_embedding(genome_5kbp_input))
 
 	layers = [celltype, assay, genome_25bp, genome_250bp, genome_5kbp]
@@ -55,18 +59,126 @@ def build_model(n_celltypes, n_celltype_factors, n_assays, n_assay_factors,
 	x = concatenate(layers)
 	for i in range(n_layers):
 		x = Dense(n_nodes, activation='relu')(x)
+		x.trainable = not freeze_network
 
 	y = Dense(1)(x)
+	y.trainable = not freeze_network
 
 	model = Model(inputs=inputs, outputs=y)
 	model.compile(optimizer='adam', loss='mse', metrics=['mse'])
 	return model
 
 class Avocado(object):
+	"""An Avocado multi-scale deep tensor factorization model.
+
+	The Avocado model is a multi-scale deep tensor factorization model. It is
+	multi-scale because it represents the genome axis using three different
+	resolutions---25 bp, 250 bp and 5 kbp. It is deep because it replaces the
+	dot product component of most linear factorization approaches with a deep
+	neural network. The tensor factors and the neural network weights are
+	trained jointly to impute the values in the tensor that it is provided.
+
+	In this case Avocado is trained on epigenomic data whose dimensions are
+	human cell type, epigenomic assay, and genomic coordinate. The trained
+	model can impute epigenomic assays that have not yet been performed, and
+	the learned factor values can themselves be used to represent genomic
+	positions more compactly than the full set of epigenomic measurements
+	could.
+
+	The default parameters are those used in the manuscript entitled 
+	"Multi-scale deep tensor factorization learns a latent representation
+	of the human epigenome". 
+
+	Parameters
+	----------
+	celltypes : list
+		The list of cell type names that will be modeled
+
+	assays : list
+		The list of assays that will be modeled
+
+	n_celltype_factors : int, optional
+		The number of factors to use to represent each cell type. Default is 32.
+
+	n_assay_factors : int, optional
+		The number of factors to use to represent each assay. Default is 256.
+
+	n_genomic_positions : int, optional
+		The number of genomic positions to model. This is typically either
+		the size of the pilot regions when performing initial training or
+		the size of the chromosome when fitting the genomic latent factors.
+		Default is 1126469, the size of the pilot regions in chr1-22.
+
+	n_25bp_factors : int, optional
+		The number of factors to use to represent the genome at 25 bp
+		resolution. Default is 25.
+
+	n_250bp_factors : int, optional
+		The number of factors to use to represent the genome at 250 bp
+		resolution. Default is 40.
+
+	n_5kbp_factors : int, optional
+		The number of factors to use to represent the genome at 5 kbp
+		resolution. Default is 45.
+
+	n_layers : int, optional
+		The number of hidden layers in the neural model. Default is 2.
+
+	n_nodes : int, optional
+		The number of nodes per layer. Default is 2048.
+
+	batch_size : int, optional
+		The size of each batch to use in training. Defaut is 40000.
+
+	freeze_celltypes : bool, optional
+		Whether to freeze the training of the cell type embedding. Default
+		is False.
+
+	freeze_assays : bool, optional
+		Whether to freeze the training of the assay embeddings. Default
+		is False.
+
+	freeze_genome_25bp : bool, optional
+		Whether to freeze the training of the 25 bp genome factors. Default
+		is False.
+
+	freeze_genome_250bp : bool, optional
+		Whether to freeze the training of the 250 bp genome factors. Default
+		is False.
+
+	freeze_genome_5kbp : bool, optional
+		Whether to freeze the training of the 5 kbp genome factors. Default
+		is False.
+
+	freeze_network : bool, optional
+		Whether to freeze the training of the neural network. Default
+		is False.
+
+	Example
+	-------
+	>>> import numpy, itertools
+	>>> from avocado import Avocado
+	>>>
+	>>> celltypes = ['E003', 'E017', 'E065', 'E116', 'E117']
+	>>> assays = ['H3K4me3', 'H3K27me3', 'H3K36me3', 'H3K9me3', 'H3K4me1']
+	>>> 
+	>>> data = {}
+	>>> for celltype, assay in itertools.product(celltypes, assays):
+	>>>    filename = 'data/{}.{}.pilot.arcsinh.npz'.format(celltype, assay)
+	>>>    data[(celltype, assay)] = numpy.load(filename)['arr_0']
+	>>>
+	>>> model = Avocado(celltypes, assays)
+	>>> model.fit(data)
+	>>>
+	>>> track = model.predict("E065", "H3K27me3")
+	"""
+
 	def __init__(self, celltypes, assays, n_celltype_factors=32, 
 		n_assay_factors=256, n_genomic_positions=1126469,
 		n_25bp_factors=25, n_250bp_factors=40, n_5kbp_factors=45, n_layers=2,
-		n_nodes=2048, batch_size=40000):
+		n_nodes=2048, batch_size=40000, freeze_celltypes=False, 
+		freeze_assays=False, freeze_genome_25bp=False, freeze_genome_250bp=False,
+		freeze_genome_5kbp=False, freeze_network=False):
 
 		self.celltypes = celltypes
 		self.assays = assays
@@ -74,8 +186,24 @@ class Avocado(object):
 		self.n_celltypes = len(celltypes)
 		self.n_assays = len(assays)
 
-		self.n_genomic_positions = n_genomic_positions
 		self.batch_size = batch_size
+
+		self.n_celltype_factors = n_celltype_factors
+		self.n_celltype_factors = n_celltype_factors
+		self.n_assay_factors = n_assay_factors
+		self.n_genomic_positions = n_genomic_positions
+		self.n_25bp_factors = n_25bp_factors
+		self.n_250bp_factors = n_250bp_factors
+		self.n_5kbp_factors = n_5kbp_factors
+		self.n_layers = n_layers
+		self.n_nodes = n_nodes
+
+		self.freeze_celltypes = freeze_celltypes
+		self.freeze_assays = freeze_assays
+		self.freeze_genome_25bp = freeze_genome_25bp
+		self.freeze_genome_250bp = freeze_genome_250bp
+		self.freeze_genome_5kbp = freeze_genome_5kbp
+		self.freeze_network = freeze_network
 
 		self.model = build_model(n_celltypes=self.n_celltypes,
 								 n_celltype_factors=n_celltype_factors,
@@ -86,14 +214,21 @@ class Avocado(object):
 								 n_250bp_factors=n_250bp_factors,
 								 n_5kbp_factors=n_5kbp_factors,
 								 n_layers=n_layers,
-								 n_nodes=n_nodes)
+								 n_nodes=n_nodes,
+								 freeze_celltypes=freeze_celltypes,
+								 freeze_assays=freeze_assays,
+								 freeze_genome_25bp=freeze_genome_25bp,
+								 freeze_genome_250bp=freeze_genome_250bp,
+								 freeze_genome_5kbp=freeze_genome_5kbp,
+								 freeze_network=freeze_network)
 
 	def summary(self):
 		"""A wrapper method for the keras summary method."""
 
 		self.model.summary()
 
-	def fit(self, X_train, X_valid=None, n_epochs=200, epoch_size=120):
+	def fit(self, X_train, X_valid=None, n_epochs=200, epoch_size=120,
+		verbose=1, callbacks=None, **kwargs):
 		"""Fit the model to the given epigenomic tracks.
 
 		Pass in a dictionary of training data and an optional dictionary of
@@ -119,6 +254,24 @@ class Avocado(object):
 
 		epoch_size : int, optional
 			The number of batches per epoch. Default is 200.
+
+		verbose: int, optional
+			The verbosity level of training. Must be one of 0, 1, or 2, where 0
+			means silent, 1 means progress bar, and 2 means use only one line
+			per epoch.
+
+		callbacks : list or None, optional
+			A list of keras callback instances to be called during training. 
+
+		**kwargs : optional
+			Any other keyword arguments to be passed into the `fit_generator`
+			method.
+
+		Returns
+		-------
+		history : keras.History.history
+			The keras history object that records training loss values and
+			metric values.
 		"""
 
 		X_train_gen = sequential_data_generator(self.celltypes, self.assays, 
@@ -127,12 +280,46 @@ class Avocado(object):
 		if X_valid is not None:
 			X_valid_gen = data_generator(self.celltypes, self.assays, 
 				X_valid, self.n_genomic_positions, self.batch_size)
-			self.model.fit_generator(X_train_gen, epoch_size, n_epochs, workers=1, 
-				pickle_safe=True, validation_data=X_valid_gen, validation_steps=30)
-		else:
-			self.model.fit_generator(X_train_gen, epoch_size, n_epochs, workers=1, pickle_safe=True)
 
-	def predict(self, celltype, assay):
+			history = self.model.fit_generator(X_train_gen, epoch_size, n_epochs, 
+				workers=1, pickle_safe=True, validation_data=X_valid_gen, 
+				validation_steps=30, verbose=verbose, callbacks=callbacks, 
+				**kwargs)
+		else:
+			history = self.model.fit_generator(X_train_gen, epoch_size, n_epochs, 
+				workers=1, pickle_safe=True, verbose=verbose, 
+				callbacks=callbacks, **kwargs)
+
+		return history
+
+	def predict(self, celltype, assay, verbose=0):
+		"""Predict a track of epigenomic data.
+
+		This will predict a track of epigenomic data, resulting in one signal
+		value per genomic position modeled. Users pass in the cell type and
+		the assay that they wish to impute and receive the track of data.
+
+		Parameters
+		----------
+		celltype : str
+			The cell type (aka biosample) to be imputed. Must be one of the
+			elements from the list of cell types passed in upon model
+			initialization.
+
+		assay : str
+			The assay to be imputed. Must be one of the elements from the list
+			of assays passed in upon model initialization.
+
+		verbose : int, optional
+			The verbosity level of the prediction. Must be 0 or 1.
+
+		Returns
+		-------
+		track : numpy.ndarray
+			A track of epigenomic signal value predictions for the specified
+			cell type and assay for the considered genomic positions.
+		"""
+
 		celltype_idx = self.celltypes.index(celltype)
 		assay_idx = self.assays.index(assay)
 
@@ -146,15 +333,120 @@ class Avocado(object):
 		X = {'celltype' : celltype_idxs, 'assay' : assay_idxs, 
 			'genome_25bp' : genomic_25bp_idxs, 'genome_250bp' : genomic_250bp_idxs, 
 			'genome_5kbp' : genomic_5kbp_idxs}
-		y = self.model.predict(X, batch_size=self.batch_size)[:,0]
-		return y
+		
+		track = self.model.predict(X, batch_size=self.batch_size, 
+			verbose=verbose)[:,0]
+		
+		return track
 
 	def get_params(self):
 		params = []
 		for layer in model.layers:
 			params.append(layers.get_weghts()[0])
 
-	def save(self, name="avocado"):
-		"""derp"""
+	def save(self, name="avocado", separators=(',', ' : '), indent=4):
+		"""Serialize the model to disk.
+
+		This function produces two files. The first is a json file that has the
+		model hyperparameters associated with it. The second is a h5 file that
+		contains the architecture of the neural network model, the weights, and
+		the optimizer.
+
+		Parameters
+		----------
+		name : str, optional
+			The name to use for the json and the h5 file that are stored.
+
+		separators : tuple, optional
+			The separators to use in the resulting JSON object.
+
+		indent : int, optional
+			The number of spaces to use in the indent of the JSON.
+
+		Returns
+		-------
+		None
+		"""
+
+		d = {
+			'celltypes': list(self.celltypes),
+			'assays': list(self.assays),
+			'n_celltype_factors': self.n_celltype_factors,
+			'n_assay_factors': self.n_assay_factors,
+			'n_genomic_positions': self.n_genomic_positions,
+			'n_25bp_factors': self.n_25bp_factors,
+			'n_250bp_factors': self.n_250bp_factors,
+			'n_5kbp_factors': self.n_5kbp_factors,
+			'n_layers': self.n_layers,
+			'n_nodes': self.n_nodes,
+			'batch_size': self.batch_size
+		}
+
+		d = json.dumps(d, separators=separators, indent=indent)
+
+		with open("{}.json".format(name), "w") as outfile:
+			outfile.write(d)
 
 		self.model.save("{}.h5".format(name))
+
+	@classmethod
+	def load(self, name, freeze_celltypes=False, freeze_assays=False,
+		freeze_genome_25bp=False, freeze_genome_250bp=False, 
+		freeze_genome_5kbp=False, freeze_network=False):
+		"""Load a model that has been serialized to disk.
+
+		The keras model that is saved to disk does not contain any of the
+		wrapper information 
+
+		Parameters
+		----------
+		name : str
+			The name of the file to load. There must be both a .json and a
+			.h5 file with this suffix. For example, if "Avocado" is passed in,
+			there must be both a "Avocado.json" and a "Avocado.h5" file to
+			be loaded in.
+
+		freeze_celltypes : bool, optional
+			Whether to freeze the training of the cell type embedding. Default
+			is False.
+
+		freeze_assays : bool, optional
+			Whether to freeze the training of the assay embeddings. Default
+			is False.
+
+		freeze_genome_25bp : bool, optional
+			Whether to freeze the training of the 25 bp genome factors. Default
+			is False.
+
+		freeze_genome_250bp : bool, optional
+			Whether to freeze the training of the 250 bp genome factors. Default
+			is False.
+
+		freeze_genome_5kbp : bool, optional
+			Whether to freeze the training of the 5 kbp genome factors. Default
+			is False.
+
+		freeze_network : bool, optional
+			Whether to freeze the training of the neural network. Default
+			is False.
+
+		Returns
+		-------
+		model : Avocado
+			An Avocado model.
+		"""
+
+		with open("{}.json".format(name), "r") as infile:
+			d = json.load(infile)
+
+		model = Avocado(freeze_celltypes=freeze_celltypes,
+						freeze_assays=freeze_assays,
+						freeze_genome_25bp=freeze_genome_25bp,
+						freeze_genome_250bp=freeze_genome_250bp,
+						freeze_genome_5kbp=freeze_genome_5kbp,
+						freeze_network=freeze_network,
+						**d)
+
+		model.model = keras.models.load_model("{}.h5".format(name))
+		return model
+		

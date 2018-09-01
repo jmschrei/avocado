@@ -330,9 +330,13 @@ class Avocado(object):
 		genomic_250bp_idxs = numpy.arange(self.n_genomic_positions) / 10
 		genomic_5kbp_idxs  = numpy.arange(self.n_genomic_positions) / 200
 
-		X = {'celltype' : celltype_idxs, 'assay' : assay_idxs, 
-			'genome_25bp' : genomic_25bp_idxs, 'genome_250bp' : genomic_250bp_idxs, 
-			'genome_5kbp' : genomic_5kbp_idxs}
+		X = {
+			'celltype' : celltype_idxs, 
+			'assay' : assay_idxs, 
+			'genome_25bp' : genomic_25bp_idxs, 
+			'genome_250bp' : genomic_250bp_idxs, 
+			'genome_5kbp' : genomic_5kbp_idxs
+		}
 		
 		track = self.model.predict(X, batch_size=self.batch_size, 
 			verbose=verbose)[:,0]
@@ -388,6 +392,61 @@ class Avocado(object):
 			outfile.write(d)
 
 		self.model.save("{}.h5".format(name))
+
+	def load_weights(self, name, verbose=0):
+		"""Load serialized weights on a layer-by-layer case.
+
+		Load the weights of a pre-saved model on a layer-by-layer case. This
+		method will iterate through the layers of the serialized model and
+		this model jointly and set the weights in this model to that of the
+		serialized model should the weight matrices be of the same size. Should
+		they not be of the same size it will not modify the current weight
+		matrix. 
+
+		A primary use of this function should be after an initial model has been
+		trained on the Pilot regions and now one is fitting a model to each of
+		the chromosomes. The size of the genome factors will differ but the other
+		components will remain the same. Correspondingly, the identically sized
+		weight matrices are those that should be held constant while the differing
+		size weight matrices should differ.
+
+		Parameters
+		----------
+		name : str
+			The suffix of the name of the weights file.
+
+		verbose : int, optional
+			The verbosity level when loading weights. 0 means silent, 1 means
+			notify when a weight matrix has been set, 2 means notify what
+			action has been taken on each layer.
+
+		Returns
+		-------
+		None
+		"""
+
+		model = keras.models.load_model("{}.h5".format(name))
+
+		for i, (self_layer, layer) in enumerate(zip(self.model.layers, model.layers)):
+			w = layer.get_weights()
+			w0 = self_layer.get_weights()
+			name = self_layer.name
+
+			if len(w) == 0:
+				if verbose == 2:
+					print("{} has no weights to set".format(name))
+				
+				continue
+
+			if w[0].shape != w0[0].shape:
+				if verbose == 2:
+					print("{} is of different size and not set".format(name))
+
+				continue
+
+			self_layer.set_weights(w)
+			if verbose > 0:
+				print("{} has been set from serialized model".format(name))
 
 	@classmethod
 	def load(self, name, freeze_celltypes=False, freeze_assays=False,
@@ -449,4 +508,3 @@ class Avocado(object):
 
 		model.model = keras.models.load_model("{}.h5".format(name))
 		return model
-		

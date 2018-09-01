@@ -25,7 +25,7 @@ Avocado can impute epigenomic experiments that have not yet been performed with 
 Avocado's learned latent representation can be used in the place of epigenomic data as input to machine learning models that are predicting some other genomic phenomena, such as promoter-enhancer interactions or chromatin conformation. In almost all cases machine learning models that use the Avocado latent factors outperform those that use epigenomic data from the cell type of interest.
 
 <p align="center">
-	<img src="figures/Avocado-tasks.png" width="750"/>
+	<img src="figures/Avocado-tasks.png" width="900"/>
 </p>
 
 ### How can I use Avocado?

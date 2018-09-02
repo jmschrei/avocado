@@ -20,9 +20,15 @@ def data_generator(celltypes, assays, data, n_positions, batch_size):
 			assay_idxs[i]    = assays.index(assay)
 			value[i]         = track[genomic_25bp_idxs[i]]
 
-		yield {'celltype' : celltype_idxs, 'assay' : assay_idxs, 
-			'genome_25bp' : genomic_25bp_idxs, 'genome_250bp' : genomic_250bp_idxs,
-			'genome_5kbp' : genomic_5kbp_idxs}, value
+		d = {
+			'celltype_input': celltype_idxs, 
+			'assay_input': assay_idxs, 
+			'genome_25bp_input': genomic_25bp_idxs, 
+			'genome_250bp_input': genomic_250bp_idxs,
+			'genome_5kbp_input': genomic_5kbp_idxs
+		}
+
+		yield d, value
 
 def sequential_data_generator(celltypes, assays, data, n_positions, batch_size):
 	start = 0
@@ -45,8 +51,15 @@ def sequential_data_generator(celltypes, assays, data, n_positions, batch_size):
 			assay_idxs[i]    = assays.index(assay)
 			value[i]         = track[genomic_25bp_idxs[i]]
 
-		yield {'celltype' : celltype_idxs, 'assay' : assay_idxs, 
-			'genome_25bp' : genomic_25bp_idxs, 'genome_250bp' : genomic_250bp_idxs,
-			'genome_5kbp' : genomic_5kbp_idxs}, value
+		d = {
+			'celltype_input': celltype_idxs, 
+			'assay_input': assay_idxs, 
+			'genome_25bp_input': genomic_25bp_idxs, 
+			'genome_250bp_input': genomic_250bp_idxs,
+			'genome_5kbp_input': genomic_5kbp_idxs
+		}
+
+		yield d, value
 
 		start += batch_size
+		

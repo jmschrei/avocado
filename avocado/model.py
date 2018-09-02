@@ -28,41 +28,49 @@ def build_model(n_celltypes, n_celltype_factors, n_assays, n_assay_factors,
 	freeze_genome_5kbp=False, freeze_network=False):
 	"""This function builds a multi-scale deep tensor factorization model."""
 
-	celltype_input = Input(shape=(1,), name="celltype")
-	celltype_embedding = Embedding(n_celltypes, n_celltype_factors, input_length=1)(celltype_input)
+	celltype_input = Input(shape=(1,), name="celltype_input")
+	celltype_embedding = Embedding(n_celltypes, n_celltype_factors, 
+		input_length=1, name="celltype_embedding")
 	celltype_embedding.trainable = not freeze_celltypes
-	celltype = Flatten()(celltype_embedding)
+	celltype = Flatten()(celltype_embedding(celltype_input))
 
-	assay_input = Input(shape=(1,), name="assay")
-	assay_embedding = Embedding(n_assays, n_assay_factors, input_length=1)
+	assay_input = Input(shape=(1,), name="assay_input")
+	assay_embedding = Embedding(n_assays, n_assay_factors, 
+		input_length=1, name="assay_embedding")
 	assay_embedding.trainable = not freeze_assays
 	assay = Flatten()(assay_embedding(assay_input))
 
-	genome_25bp_input = Input(shape=(1,), name="genome_25bp")
-	genome_25bp_embedding = Embedding(n_genomic_positions, n_25bp_factors, input_length=1)
+	genome_25bp_input = Input(shape=(1,), name="genome_25bp_input")
+	genome_25bp_embedding = Embedding(n_genomic_positions, n_25bp_factors, 
+		input_length=1, name="genome_25bp_embedding")
 	genome_25bp_embedding.trainable = not freeze_genome_25bp
 	genome_25bp = Flatten()(genome_25bp_embedding(genome_25bp_input))
 
-	genome_250bp_input = Input(shape=(1,), name="genome_250bp")
-	genome_250bp_embedding = Embedding((n_genomic_positions / 10) + 1, n_250bp_factors, input_length=1)
+	genome_250bp_input = Input(shape=(1,), name="genome_250bp_input")
+	genome_250bp_embedding = Embedding((n_genomic_positions / 10) + 1,
+		n_250bp_factors, input_length=1, name="genome_250bp_embedding")
 	genome_250bp_embedding.trainable = not freeze_genome_250bp
 	genome_250bp = Flatten()(genome_250bp_embedding(genome_250bp_input))
 
-	genome_5kbp_input = Input(shape=(1,), name="genome_5kbp")
-	genome_5kbp_embedding = Embedding((n_genomic_positions / 200) + 1, n_5kbp_factors, input_length=1)
+	genome_5kbp_input = Input(shape=(1,), name="genome_5kbp_input")
+	genome_5kbp_embedding = Embedding((n_genomic_positions / 200) + 1, 
+		n_5kbp_factors, input_length=1, name="genome_5kbp_embedding")
 	genome_5kbp_embedding.trainable = not freeze_genome_5kbp
 	genome_5kbp = Flatten()(genome_5kbp_embedding(genome_5kbp_input))
 
 	layers = [celltype, assay, genome_25bp, genome_250bp, genome_5kbp]
-	inputs = (celltype_input, assay_input, genome_25bp_input, genome_250bp_input, genome_5kbp_input)
+	inputs = (celltype_input, assay_input, genome_25bp_input, 
+		genome_250bp_input, genome_5kbp_input)
 
 	x = concatenate(layers)
 	for i in range(n_layers):
-		x = Dense(n_nodes, activation='relu')(x)
-		x.trainable = not freeze_network
+		layer = Dense(n_nodes, activation='relu', name="dense_{}".format(i))
+		layer.trainable = not freeze_network
+		x = layer(x)
 
-	y = Dense(1)(x)
-	y.trainable = not freeze_network
+	layer = Dense(1, name="y_pred")
+	layer.trainable = not freeze_network
+	y = layer(x)
 
 	model = Model(inputs=inputs, outputs=y)
 	model.compile(optimizer='adam', loss='mse', metrics=['mse'])

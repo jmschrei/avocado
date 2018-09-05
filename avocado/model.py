@@ -339,11 +339,11 @@ class Avocado(object):
 		genomic_5kbp_idxs  = numpy.arange(self.n_genomic_positions) / 200
 
 		X = {
-			'celltype' : celltype_idxs, 
-			'assay' : assay_idxs, 
-			'genome_25bp' : genomic_25bp_idxs, 
-			'genome_250bp' : genomic_250bp_idxs, 
-			'genome_5kbp' : genomic_5kbp_idxs
+			'celltype_input': celltype_idxs, 
+			'assay_input': assay_idxs, 
+			'genome_25bp_input': genomic_25bp_idxs, 
+			'genome_250bp_input': genomic_250bp_idxs,
+			'genome_5kbp_input': genomic_5kbp_idxs
 		}
 		
 		track = self.model.predict(X, batch_size=self.batch_size, 

@@ -283,48 +283,48 @@ class Avocado(object):
 		"""
 
 		if not isinstance(X_train, dict):
-			raise ValueError("X_train must be a dictionary where the keys", \
-				" are (celltype, assay) tuples and the values are the track", \
+			raise ValueError("X_train must be a dictionary where the keys" \
+				" are (celltype, assay) tuples and the values are the track" \
 				" corresponding to that pair.")
 
 		if X_valid is not None and not isinstance(X_valid, dict):
-			raise ValueError("X_valid must be a dictionary where the keys", \
-				" are (celltype, assay) tuples and the values are the track", \
+			raise ValueError("X_valid must be a dictionary where the keys" \
+				" are (celltype, assay) tuples and the values are the track" \
 				" corresponding to that pair.")	
 
 		for (celltype, assay), track in X_train.items():
 			if celltype not in self.celltypes:
-				raise ValueError("Celltype {} appears in".format(celltype), \
-					" the training data but not in the list of cell types",\
+				raise ValueError("Celltype {} appears in".format(celltype) \
+					" the training data but not in the list of cell types"\
 					" provided to the model.")
 
-			if assay not in self.celltypes:
-				raise ValueError("Assay {} appears in".format(assay), \
-					" the training data but not in the list of cell types",\
+			if assay not in self.assays:
+				raise ValueError("Assay {} appears in".format(assay) +\
+					" the training data but not in the list of assays"\
 					" provided to the model.")
 
 			if len(track) != self.n_genomic_positions:
-				raise ValueError("The track corresponding to ",\
-					"{} {}".format(celltype, assay) + " is of size ",\
-					"{}".format(len(track)) + " but the model encodes",\
+				raise ValueError("The track corresponding to "\
+					"{} {}".format(celltype, assay) + " is of size "\
+					"{}".format(len(track)) + " but the model encodes"\
 					"{}".format(self.n_genomic_positions) + " positions.")
 
 		if X_valid is not None:
 			for (celltype, assay), track in X_valid.items():
 				if celltype not in self.celltypes:
-					raise ValueError("Celltype {} appears in".format(celltype), \
-						" the validation data but not in the list of cell",\
-						" types provided to the model.")
-					
-				if assay not in self.celltypes:
-					raise ValueError("Assay {} appears in".format(assay), \
-						" the validation data but not in the list of cell",\
+					raise ValueError("Celltype {} appears in".format(celltype) \
+						" the validation data but not in the list of cell"\
 						" types provided to the model.")
 
+				if assay not in self.assays:
+					raise ValueError("Assay {} appears in".format(assay) \
+						" the validation data but not in the list of assays"\
+						" provided to the model.")
+
 				if len(track) != self.n_genomic_positions:
-					raise ValueError("The track corresponding to ",\
-						"{} {}".format(celltype, assay) + " is of size ",\
-						"{}".format(len(track)) + " but the model encodes",\
+					raise ValueError("The track corresponding to "\
+						"{} {}".format(celltype, assay) + " is of size "\
+						"{}".format(len(track)) + " but the model encodes"\
 						"{}".format(self.n_genomic_positions) + " positions.")
 
 		X_train_gen = sequential_data_generator(self.celltypes, self.assays, 

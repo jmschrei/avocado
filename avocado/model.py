@@ -294,38 +294,38 @@ class Avocado(object):
 
 		for (celltype, assay), track in X_train.items():
 			if celltype not in self.celltypes:
-				raise ValueError("Celltype {} appears in".format(celltype) \
-					" the training data but not in the list of cell types" \
-					" provided to the model.")
+				raise ValueError("Celltype {} appears in the training data " \
+					"but not in the list of cell types provided to the " \
+					"model.".format(celltype))
 
 			if assay not in self.assays:
-				raise ValueError("Assay {} appears in".format(assay) \
-					" the training data but not in the list of assays" \
-					" provided to the model.")
+				raise ValueError("Assay {} appears in the training data " \
+					"but not in the list of assays provided to the " \
+					"model.".format(assay))
 
 			if len(track) != self.n_genomic_positions:
-				raise ValueError("The track corresponding to " \
-					"{} {}".format(celltype, assay) + " is of size " \
-					"{}".format(len(track)) + " but the model encodes" \
-					"{}".format(self.n_genomic_positions) + " positions.")
+				raise ValueError("The track corresponding to {} {} is of " \
+					"size {} while the model encodes {} genomic " \
+					"positions".format(celltype, assay, len(track), 
+						self.n_genomic_positions))
 
 		if X_valid is not None:
 			for (celltype, assay), track in X_valid.items():
 				if celltype not in self.celltypes:
-					raise ValueError("Celltype {} appears in".format(celltype) \
-						" the validation data but not in the list of cell" \
-						" types provided to the model.")
+					raise ValueError("Celltype {} appears in the validation " \
+						"data but not in the list of cell types provided to " \
+						"the model.".format(celltype))
 
 				if assay not in self.assays:
-					raise ValueError("Assay {} appears in".format(assay) \
-						" the validation data but not in the list of assays" \
-						" provided to the model.")
+					raise ValueError("Assay {} appears in the validation " \
+						"data but not in the list of assays provided to the " \
+						"model.".format(assay))
 
 				if len(track) != self.n_genomic_positions:
-					raise ValueError("The track corresponding to " \
-						"{} {}".format(celltype, assay) + " is of size " \
-						"{}".format(len(track)) + " but the model encodes" \
-						"{}".format(self.n_genomic_positions) + " positions.")
+					raise ValueError("The track corresponding to {} {} is of " \
+						"size {} while the model encodes {} genomic " \
+						"positions".format(celltype, assay, len(track), 
+							self.n_genomic_positions))
 
 		X_train_gen = sequential_data_generator(self.celltypes, self.assays, 
 			X_train, self.n_genomic_positions, self.batch_size)

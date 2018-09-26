@@ -113,11 +113,12 @@ def bedgraph_to_dense(filename, verbose=True):
 
 	bedgraph = pandas.read_csv(filename, sep="\t", header=None)
 	n = bedgraph[2].values[-1]
+	k = bedgraph.shape[0]
 	data = numpy.zeros(n)
 
 	d = not verbose
-	for i, (_, start, end, value) in tqdm(bedgraph.iterrows(), disable=d):
-		data[start:end] = value
+	for i, (_, start, end, v) in tqdm(bedgraph.iterrows(), total=k, disable=d):
+		data[start:end] = v
 
 	return data
 

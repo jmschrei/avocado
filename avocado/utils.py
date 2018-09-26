@@ -112,7 +112,7 @@ def bedgraph_to_dense(filename, verbose=True):
 	"""
 
 	bedgraph = pandas.read_csv(filename, sep="\t", header=None)
-	n = data[2].values[-1]
+	n = bedgraph[2].values[-1]
 	data = numpy.zeros(n)
 
 	if verbose == True:

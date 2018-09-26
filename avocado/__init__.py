@@ -10,4 +10,4 @@ use it yourself.
 
 from .model import Avocado
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'

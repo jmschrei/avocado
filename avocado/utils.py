@@ -115,17 +115,9 @@ def bedgraph_to_dense(filename, verbose=True):
 	n = bedgraph[2].values[-1]
 	data = numpy.zeros(n)
 
-	if verbose == True:
-		pbar = tqdm(total=data.shape[0])
-
-	for i, (_, start, end, value) in bedgraph.iterrows():
+	d = not verbose
+	for i, (_, start, end, value) in tqdm(bedgraph.iterrows(), disable=d):
 		data[start:end] = value
-
-		if verbose == True:
-			pbar.update(1)
-
-	if verbose == True:
-		pbar.close()
 
 	return data
 

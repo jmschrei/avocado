@@ -36,6 +36,10 @@ This will yield imputations at 25 bp across the entirety chromosome 1 for the as
 
 #### Using the learned latent representation
 
+<p align="center">
+	<img src="figures/Avocado-celltypes.png" width="550"/>
+</p>
+
 We have provided the learned latent representation from the manuscript <a href="https://noble.gs.washington.edu/proj/avocado/model/">here</a>. They can also be directly extracted from a model object using the following commands:
 
 ```python
@@ -85,54 +89,23 @@ track = model.predict("E065", "H3K4me3")
 
 There are currently two tutorials in the form of Jupyter notebooks. One focuses on how to use this code to train an Avocado model, make imputations, and extract the resulting latent factors. The second shows how one might use the latent factors to make predictions in two downstream tasks. 
 
+<p align="center">
+	<img src="figures/Avocado-Training.gif" width="850"/>
+</p>
+
 #### Can I add my own cell type and assay to your model?
 
 Yes! The model is flexible enough to allow one to easily add in new cell types or assays without needing to retrain all of the parameters. The procedure is essentially to freeze the latent factors on the genome axis, the neural network parameters, and the latent factors in the assay embedding if you're adding in a new cell type or in the cell type embedding if you're adding in a new assay. Then, one can learn the latent factors corresponding either to the cell types or assays to be added in. This works because the frozen neural network parameters ensure that the new embedding is comparable to the old one. In fact, this is how we learn genomic representations that are comparable from one chromosome to another despite training the representations independently.
 
-Programmatically, the procedure is to either train your initial model as normal or to get a pre-trained model (such as the Avocado model we provide). Let's train our initial model using only four of the five example cell types.
+Programmatically there is a built-in function that allows you to pass in data for new cell types or assays and learn their respective embeddings. All you have to do to add in new cell types is make a data dictionary with the same format as training the model like the normal `fit` method except that the cell types are all new and the assays are those that are already in the model.
 
 ```python
-import numpy, itertools
-from avocado import Avocado
-
-celltypes = ['E003', 'E017', 'E065', 'E116', 'E117']
-assays = ['H3K4me3', 'H3K27me3', 'H3K36me3', 'H3K9me3', 'H3K4me1']
-
 data = {}
-for celltype, assay in itertools.product(celltypes[1:], assays):
-	filename = 'data/{}.{}.pilot.arcsinh.npz'.format(celltype, assay)
-	data[(celltype, assay)] = numpy.load(filename)['arr_0']
+for assay in assays:
+	filename = 'data/E004.{}.pilot.arcsinh.npz'.format(celltype, assay)
+	data[('E004', assay)] = numpy.load(filename)['arr_0']
 
-model = Avocado(celltypes[1:], assays, n_25bp_factors=5, n_250bp_factors=5, 
-	n_5kbp_factors=5, n_layers=1, n_nodes=16, n_celltype_factors=16, 
-	n_assay_factors=24)
-
-model.summary()
-model.fit(data, n_epochs=25)
+model.fit_celltypes(data, n_epochs=5)
 ```
 
-We then need to save the model to disk.
-
-```python
-model.save("avocado")
-```
-
-Then we need to load up the weights of our trained model to a new Avocado model that freezes all parameters except the cell type embedding and train it.
-
-```python
-data2 = {}
-for celltype, assay in itertools.product(celltypes[:1], assays):
-	filename = 'data/{}.{}.pilot.arcsinh.npz'.format(celltype, assay)
-	data2[(celltype, assay)] = numpy.load(filename)['arr_0']
-
-model2 = Avocado(celltypes[:1], assays, n_25bp_factors=5, n_250bp_factors=5, 
-	n_5kbp_factors=5, n_layers=1, n_nodes=16, n_celltype_factors=16, 
-	n_assay_factors=24, freeze_network=True, freeze_genome_25bp=True,
-	freeze_genome_250bp=True, freeze_genome_5kbp=True, freeze_assays=True)
-
-model2.summary()
-model2.load_weights("avocado", verbose=2)
-model2.fit(data2, n_epochs=25)
-```
-
-Now we can use this model to impute any epigenomic experiments covered by this model for this new cell type!
+The model will freeze all the parameters and only learn the embeddings for the new cell types (or assays if you use `fit_assays` instead). Once those new embeddings are used you can impute any epigenomic experiments for the new cell types just as if they were part of the original model!

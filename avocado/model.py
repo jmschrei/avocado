@@ -230,6 +230,100 @@ class Avocado(object):
 								 freeze_genome_5kbp=freeze_genome_5kbp,
 								 freeze_network=freeze_network)
 
+	@property
+	def celltype_embedding(self):
+		"""Returns the learned cell type embedding as a numpy array.
+
+		Parameters
+		----------
+		None
+
+		Returns
+		-------
+		celltype_embedding : numpy.ndarray, shape=(n_celltypes, n_factors)
+			The learned embedding corresponding to the input name 
+			'celltype_embedding'. The cell types are ordered according to the
+			order defined in self.celltypes.
+		"""
+
+		for layer in self.model.layers:
+			if layer.name == 'celltype_embedding':
+				return layer.get_weights()[0]
+
+		raise ValueError("No layer in model named 'celltype_embedding'.")
+
+	@property
+	def assay_embedding(self):
+		"""Returns the learned assay embedding as a numpy array.
+
+		Parameters
+		----------
+		None
+
+		Returns
+		-------
+		assay_embedding : numpy.ndarray, shape=(n_assays, n_factors)
+			The learned embedding corresponding to the input name
+			'assay_embedding'. The assays are ordered according to the order 
+			defined in self.assays.
+		"""
+
+		for layer in self.model.layers:
+			if layer.name == 'assay_embedding':
+				return layer.get_weights()[0]
+
+		raise ValueError("No layer in model named 'assay_embedding'.")
+
+
+	@property
+	def genome_embedding(self):
+		"""Returns the learned genomic embedding as a numpy array.
+
+		This function will concatenate together the three resolutions of
+		genomic factors, such that the first columns correspond to the
+		25 bp factors, the next columns correspond to the 250 bp factors,
+		and the final columns correspond to the 5 kbp factors. The factors
+		that span more than 25 bp will be repeated across several successive
+		positions 
+
+		Parameters
+		----------
+		None
+
+		Returns
+		-------
+		genome_embedding : numpy.ndarray, shape=(n_genomic_positions, 
+			n_25bp_factors + n_250bp_factors + n_5kbp_factors)
+			The learned embedding corresponding to the input names
+			genome_25bp_embedding, genome_250bp_embedding, and 
+			genome_5kbp_embedding.
+		"""
+
+		n_25bp = self.n_25bp_factors
+		n_250bp = self.n_250bp_factors
+		n_5kbp = self.n_5kbp_factors
+
+		genome_embedding = numpy.empty((self.n_genomic_positions, 
+			n_25bp + n_250bp + n_5kbp))
+
+		for layer in self.model.layers:
+			if layer.name == 'genome_25bp_embedding':
+				genome_25bp_embedding = layer.get_weights()[0]
+			elif layer.name == 'genome_250bp_embedding':
+				genome_250bp_embedding = layer.get_weights()[0]
+			elif layer.name == 'genome_5kbp_embedding':
+				genome_5kbp_embedding = layer.get_weights()[0]
+
+		n1 = n_25bp
+		n2 = n_25bp + n_250bp
+
+		for i in range(self.n_genomic_positions):
+			genome_embedding[i, :n1] = genome_25bp_embedding[i]
+			genome_embedding[i, n1:n2] = genome_250bp_embedding[i // 10]
+			genome_embedding[i, n2:] = genome_5kbp_embedding[i // 200]
+
+		return genome_embedding
+
 	def summary(self):
 		"""A wrapper method for the keras summary method."""
 
@@ -343,6 +437,382 @@ class Avocado(object):
 				workers=1, pickle_safe=True, verbose=verbose, 
 				callbacks=callbacks, **kwargs)
 
+		return history
+
+	def fit_celltypes(self, X_train, X_valid=None, n_epochs=200, epoch_size=120,
+		verbose=1, callbacks=None, **kwargs):
+		"""Add a new cell type(s) to an otherwise frozen model.
+
+		This method will add a new cell type to the cell type embedding after
+		freezing all of the other parameters in the model, including weights
+		and the other cell type positions. Functionally it will train a new
+		cell type embedding and return a new model whose cell type embedding
+		is the concatenation of the old cell type embedding and the new one.
+
+		Pass in a dictionary of training data and an optional dictionary of
+		validation data. The keys to this dictionary are a tuple of the format
+		(celltype, assay) and the values are the corresponding track in the
+		form of a numpy array. The tracks can either be in the form of an array
+		that is in memory or as a memory map. The celltypes provided should not
+		appear in the model.celltypes attribute but the assays should exclusively
+		appear in the model.assays attribute.
+
+		Parameters
+		----------
+		X_train : dict
+			A dictionary of training data values, where the keys are a tuple of
+			(celltype, assay) and the values are a track.
+
+		X_valid : dict or None, optional
+			A dictionary of validation data values that are used to calculate
+			validation set MSE during the training process. If None, validation
+			set statistics are not calculated during the training process.
+			Default is None.
+
+		n_epochs : int, optional
+			The number of epochs to train on before ending training. Default is 120.
+
+		epoch_size : int, optional
+			The number of batches per epoch. Default is 200.
+
+		verbose: int, optional
+			The verbosity level of training. Must be one of 0, 1, or 2, where 0
+			means silent, 1 means progress bar, and 2 means use only one line
+			per epoch.
+
+		callbacks : list or None, optional
+			A list of keras callback instances to be called during training. 
+
+		**kwargs : optional
+			Any other keyword arguments to be passed into the `fit_generator`
+			method.
+
+		Returns
+		-------
+		history : keras.History.history
+			The keras history object that records training loss values and
+			metric values.
+		"""
+
+		if not isinstance(X_train, dict):
+			raise ValueError("X_train must be a dictionary where the keys" \
+				" are (celltype, assay) tuples and the values are the track" \
+				" corresponding to that pair.")
+
+		if X_valid is not None and not isinstance(X_valid, dict):
+			raise ValueError("X_valid must be a dictionary where the keys" \
+				" are (celltype, assay) tuples and the values are the track" \
+				" corresponding to that pair.")	
+
+		for (celltype, assay), track in X_train.items():
+			if celltype in self.celltypes:
+				raise ValueError("Celltype {} appears in the training data " \
+					"and also in the list of cell types already in the " \
+					"model.".format(celltype))
+
+			if assay not in self.assays:
+				raise ValueError("Assay {} appears in the training data " \
+					"but not in the list of assays provided to the " \
+					"model.".format(assay))
+
+			if len(track) != self.n_genomic_positions:
+				raise ValueError("The track corresponding to {} {} is of " \
+					"size {} while the model encodes {} genomic " \
+					"positions".format(celltype, assay, len(track), 
+						self.n_genomic_positions))
+
+		if X_valid is not None:
+			for (celltype, assay), track in X_valid.items():
+				if celltype in self.celltypes:
+					raise ValueError("Celltype {} appears in the validation " \
+						"data and also in the list of cell types already in " \
+						"the model.".format(celltype))
+
+				if assay not in self.assays:
+					raise ValueError("Assay {} appears in the training data " \
+						"but not in the list of assays provided to the " \
+						"model.".format(assay))
+
+				if len(track) != self.n_genomic_positions:
+					raise ValueError("The track corresponding to {} {} is of " \
+						"size {} while the model encodes {} genomic " \
+						"positions".format(celltype, assay, len(track), 
+							self.n_genomic_positions))
+
+		new_celltypes = list(numpy.unique([ct for ct, _ in X_train.keys()]))
+
+		model = build_model(n_celltypes=len(new_celltypes),
+							n_celltype_factors=self.n_celltype_factors,
+							n_assays=self.n_assays,
+							n_assay_factors=self.n_assay_factors,
+							n_genomic_positions=self.n_genomic_positions,
+							n_25bp_factors=self.n_25bp_factors,
+							n_250bp_factors=self.n_250bp_factors,
+							n_5kbp_factors=self.n_5kbp_factors,
+							n_layers=self.n_layers,
+							n_nodes=self.n_nodes,
+							freeze_celltypes=False,
+							freeze_assays=True,
+							freeze_genome_25bp=True,
+							freeze_genome_250bp=True,
+							freeze_genome_5kbp=True,
+							freeze_network=True)
+
+		for old_layer, new_layer in zip(self.model.layers, model.layers):
+			if 'input' in old_layer.name:
+				continue
+			if old_layer.name == 'celltype_embedding':
+				continue
+
+			new_layer.set_weights(old_layer.get_weights())
+
+
+		X_train_gen = sequential_data_generator(new_celltypes, self.assays, 
+			X_train, self.n_genomic_positions, self.batch_size)
+
+		if X_valid is not None:
+			X_valid_gen = data_generator(new_celltypes, self.assays, 
+				X_valid, self.n_genomic_positions, self.batch_size)
+
+			history = model.fit_generator(X_train_gen, epoch_size, n_epochs, 
+				workers=1, pickle_safe=True, validation_data=X_valid_gen, 
+				validation_steps=30, verbose=verbose, callbacks=callbacks, 
+				**kwargs)
+		else:
+			history = model.fit_generator(X_train_gen, epoch_size, n_epochs, 
+				workers=1, pickle_safe=True, verbose=verbose, 
+				callbacks=callbacks, **kwargs)
+
+		for layer in self.model.layers:
+			if layer.name == 'celltype_embedding':
+				celltype_embedding = layer.get_weights()[0]
+				break
+
+		for layer in model.layers:
+			if layer.name == 'celltype_embedding':
+				new_celltype_embedding = layer.get_weights()[0]
+				break
+
+		celltype_embedding = numpy.concatenate([celltype_embedding, 
+			new_celltype_embedding]) 
+
+		self.celltypes.extend(new_celltypes)
+		self.n_celltypes = len(self.celltypes)
+
+		model = build_model(n_celltypes=self.n_celltypes,
+							n_celltype_factors=self.n_celltype_factors,
+							n_assays=self.n_assays,
+							n_assay_factors=self.n_assay_factors,
+							n_genomic_positions=self.n_genomic_positions,
+							n_25bp_factors=self.n_25bp_factors,
+							n_250bp_factors=self.n_250bp_factors,
+							n_5kbp_factors=self.n_5kbp_factors,
+							n_layers=self.n_layers,
+							n_nodes=self.n_nodes,
+							freeze_celltypes=self.freeze_celltypes,
+							freeze_assays=self.freeze_assays,
+							freeze_genome_25bp=self.freeze_genome_25bp,
+							freeze_genome_250bp=self.freeze_genome_250bp,
+							freeze_genome_5kbp=self.freeze_genome_5kbp,
+							freeze_network=self.freeze_network)
+
+		for old_layer, new_layer in zip(self.model.layers, model.layers):
+			if 'input' in old_layer.name:
+				continue
+			if old_layer.name == 'celltype_embedding':
+				new_layer.set_weights([celltype_embedding])
+			else:
+				new_layer.set_weights(old_layer.get_weights())
+
+		self.model = model
+		return history
+
+	def fit_assays(self, X_train, X_valid=None, n_epochs=200, epoch_size=120,
+		verbose=1, callbacks=None, **kwargs):
+		"""Add a new assay(s) to an otherwise frozen model.
+
+		This method will add a new assay to the assay embedding after
+		freezing all of the other parameters in the model, including weights
+		and the other assay positions. Functionally it will train a new
+		assay embedding and return a new model whose assay embedding
+		is the concatenation of the old assay embedding and the new one.
+
+		Pass in a dictionary of training data and an optional dictionary of
+		validation data. The keys to this dictionary are a tuple of the format
+		(celltype, assay) and the values are the corresponding track in the
+		form of a numpy array. The tracks can either be in the form of an array
+		that is in memory or as a memory map. The assays provided should not
+		appear in the model.assays attribute, but the cell types should appear
+		in the model.celltypes attribute.
+
+		Parameters
+		----------
+		X_train : dict
+			A dictionary of training data values, where the keys are a tuple of
+			(celltype, assay) and the values are a track.
+
+		X_valid : dict or None, optional
+			A dictionary of validation data values that are used to calculate
+			validation set MSE during the training process. If None, validation
+			set statistics are not calculated during the training process.
+			Default is None.
+
+		n_epochs : int, optional
+			The number of epochs to train on before ending training. Default is 120.
+
+		epoch_size : int, optional
+			The number of batches per epoch. Default is 200.
+
+		verbose: int, optional
+			The verbosity level of training. Must be one of 0, 1, or 2, where 0
+			means silent, 1 means progress bar, and 2 means use only one line
+			per epoch.
+
+		callbacks : list or None, optional
+			A list of keras callback instances to be called during training. 
+
+		**kwargs : optional
+			Any other keyword arguments to be passed into the `fit_generator`
+			method.
+
+		Returns
+		-------
+		history : keras.History.history
+			The keras history object that records training loss values and
+			metric values.
+		"""
+
+		if not isinstance(X_train, dict):
+			raise ValueError("X_train must be a dictionary where the keys" \
+				" are (celltype, assay) tuples and the values are the track" \
+				" corresponding to that pair.")
+
+		if X_valid is not None and not isinstance(X_valid, dict):
+			raise ValueError("X_valid must be a dictionary where the keys" \
+				" are (celltype, assay) tuples and the values are the track" \
+				" corresponding to that pair.")	
+
+		for (celltype, assay), track in X_train.items():
+			if celltype not in self.celltypes:
+				raise ValueError("Celltype {} appears in the training data " \
+					"but not in the list of cell types already in the " \
+					"model.".format(celltype))
+
+			if assay in self.assays:
+				raise ValueError("Assay {} appears in the training data " \
+					"and also in the list of assays already in the " \
+					"model.".format(assay))
+
+			if len(track) != self.n_genomic_positions:
+				raise ValueError("The track corresponding to {} {} is of " \
+					"size {} while the model encodes {} genomic " \
+					"positions".format(celltype, assay, len(track), 
+						self.n_genomic_positions))
+
+		if X_valid is not None:
+			for (celltype, assay), track in X_valid.items():
+				if celltype not in self.celltypes:
+					raise ValueError("Celltype {} appears in the validation " \
+						"data but not in the list of cell types already in " \
+						"the model.".format(celltype))
+
+				if assay in self.assays:
+					raise ValueError("Assay {} appears in the training data " \
+						"and also in the list of assays already in the " \
+						"model.".format(assay))
+
+				if len(track) != self.n_genomic_positions:
+					raise ValueError("The track corresponding to {} {} is of " \
+						"size {} while the model encodes {} genomic " \
+						"positions".format(celltype, assay, len(track), 
+							self.n_genomic_positions))
+
+		new_assays = list(numpy.unique([assay for _, assay in X_train.keys()]))
+
+		model = build_model(n_celltypes=self.n_celltypes,
+							n_celltype_factors=self.n_celltype_factors,
+							n_assays=len(new_assays),
+							n_assay_factors=self.n_assay_factors,
+							n_genomic_positions=self.n_genomic_positions,
+							n_25bp_factors=self.n_25bp_factors,
+							n_250bp_factors=self.n_250bp_factors,
+							n_5kbp_factors=self.n_5kbp_factors,
+							n_layers=self.n_layers,
+							n_nodes=self.n_nodes,
+							freeze_celltypes=False,
+							freeze_assays=True,
+							freeze_genome_25bp=True,
+							freeze_genome_250bp=True,
+							freeze_genome_5kbp=True,
+							freeze_network=True)
+
+		for old_layer, new_layer in zip(self.model.layers, model.layers):
+			if 'input' in old_layer.name:
+				continue
+			if old_layer.name == 'assay_embedding':
+				continue
+
+			new_layer.set_weights(old_layer.get_weights())
+
+
+		X_train_gen = sequential_data_generator(self.celltypes, new_assays, 
+			X_train, self.n_genomic_positions, self.batch_size)
+
+		if X_valid is not None:
+			X_valid_gen = data_generator(self.celltypes, new_assays, 
+				X_valid, self.n_genomic_positions, self.batch_size)
+
+			history = model.fit_generator(X_train_gen, epoch_size, n_epochs, 
+				workers=1, pickle_safe=True, validation_data=X_valid_gen, 
+				validation_steps=30, verbose=verbose, callbacks=callbacks, 
+				**kwargs)
+		else:
+			history = model.fit_generator(X_train_gen, epoch_size, n_epochs, 
+				workers=1, pickle_safe=True, verbose=verbose, 
+				callbacks=callbacks, **kwargs)
+
+		for layer in self.model.layers:
+			if layer.name == 'assay_embedding':
+				assay_embedding = layer.get_weights()[0]
+				break
+
+		for layer in model.layers:
+			if layer.name == 'assay_embedding':
+				new_assay_embedding = layer.get_weights()[0]
+				break
+
+		assay_embedding = numpy.concatenate([assay_embedding, 
+			new_assay_embedding]) 
+
+		self.assays.extend(new_assays)
+		self.n_assays = len(self.assays)
+
+		model = build_model(n_celltypes=self.n_celltypes,
+							n_celltype_factors=self.n_celltype_factors,
+							n_assays=self.n_assays,
+							n_assay_factors=self.n_assay_factors,
+							n_genomic_positions=self.n_genomic_positions,
+							n_25bp_factors=self.n_25bp_factors,
+							n_250bp_factors=self.n_250bp_factors,
+							n_5kbp_factors=self.n_5kbp_factors,
+							n_layers=self.n_layers,
+							n_nodes=self.n_nodes,
+							freeze_celltypes=self.freeze_celltypes,
+							freeze_assays=self.freeze_assays,
+							freeze_genome_25bp=self.freeze_genome_25bp,
+							freeze_genome_250bp=self.freeze_genome_250bp,
+							freeze_genome_5kbp=self.freeze_genome_5kbp,
+							freeze_network=self.freeze_network)
+
+		for old_layer, new_layer in zip(self.model.layers, model.layers):
+			if 'input' in old_layer.name:
+				continue
+			if old_layer.name == 'assay_embedding':
+				new_layer.set_weights([assay_embedding])
+			else:
+				new_layer.set_weights(old_layer.get_weights())
+
+		self.model = model
 		return history
 
 	def predict(self, celltype, assay, verbose=0):

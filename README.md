@@ -34,6 +34,8 @@ track = model.predict("E065", "H3K4me3")
 
 This will yield imputations at 25 bp across the entirety chromosome 1 for the assay H3K4me3 in cell type E065. Note that because the genome is so long the genome factors cannot fit entirely in memory. Accordingly, we have split the model into one per chromosome, where the neural network parameters, cell type embedding, and assay embedding, are shared from one chromosome to the next.
 
+The imputations are generally high quality and typically more accurate than competing methods. Below is an example of the imputation of H3K4me3 from ChromImpute, PREDICTD, and Avocado.
+
 <p align="center">
 	<img src="figures/Avocado-imputations.png" width="800"/>
 </p>

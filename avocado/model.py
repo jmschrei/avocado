@@ -20,7 +20,6 @@ from keras.layers import Multiply, Dot, Flatten, concatenate
 from keras.models import Model
 from keras.optimizers import Adam
 
-
 def build_model(n_celltypes, n_celltype_factors, n_assays, n_assay_factors,
 	n_genomic_positions, n_25bp_factors, n_250bp_factors, n_5kbp_factors,
 	n_layers, n_nodes, freeze_celltypes=False, freeze_assays=False,

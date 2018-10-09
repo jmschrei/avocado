@@ -58,7 +58,7 @@ The imputations are generally high quality and typically more accurate than comp
 	<img src="figures/Avocado-celltypes.png" width="550"/>
 </p>
 
-We have provided the learned latent representation from the manuscript <a href="https://noble.gs.washington.edu/proj/avocado/model/">here</a>. They can also be directly extracted from a model object using the following commands:
+The learned cell type representation is shown above. Each of the points corresponds to a cell type included in the model, and are colored by their function. As you can see, they cluster very well according to this function. All three embeddings can be extracted from the commands using the following simple commands:
 
 ```python
 >>> genome_embedding = model.genome_embedding

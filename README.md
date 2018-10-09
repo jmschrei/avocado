@@ -16,16 +16,16 @@ pip install avocado-epigenome
 
 #### Imputing epigenomic data
 
-Avocado can impute signal values with high accuracy for epigenomic experiments that have not yet been performed with high accuracy. These imputations are of arcsinh transformed -log10 p-values at 25 bp resolution and cover the entirety of chromosomes 1 through 22. Making imputations with a pre-trained model requires only two lines; loading the model, and calling the predict method. We can start by loading up the [pre-trained model](https://noble.gs.washington.edu/proj/avocado/model/).
+Avocado can impute signal values with high accuracy for epigenomic experiments that have not yet been performed with high accuracy. These imputations are of arcsinh transformed -log10 p-values at 25 bp resolution and cover the entirety of chromosomes 1 through 22. Making imputations with a pre-trained model requires only two lines; loading the model, and calling the predict method. We can start by loading up the [pre-trained model](https://noble.gs.washington.edu/proj/avocado/model/) for chromosome 19.
 
 ```python
 >>> from avocado import Avocado
->>> model = Avocado.load("avocado-chr13")
+>>> model = Avocado.load("avocado-chr19")
 ```
 
-This will create a model with the architecture specified in `avocado-chr13.json` and load the weights from the file `avocado-chr13.h5`. 
+This will create a model with the architecture specified in `avocado-chr19.json` and load the weights from the file `avocado-chr19.h5`. 
 
-Now, we can use this model to impute values for any combination of cell type and assay that are trained in the model. The attributes `model.celltypes` and `model.assays` should list those that have been trained on. 
+Now, we can use this model to impute values for any combination of cell type and assay that are contained in the model. The attributes `model.celltypes` and `model.assays` should list those that are contained in the model. 
 
 ```python
 >>> track = model.predict("E004", "H3K36me3")
@@ -34,7 +34,7 @@ array([ 0.11702164,  0.12218985,  0.12052222, ..., -0.06277317,
        -0.06284004, -0.06013602], dtype=float32)
 ```
 
-This will yield imputations at 25 bp across the entirety chromosome 19 for the assay H3K36me3 in cell type E004. These imputations will be the same as the ones provided in the [imputations folder](https://noble.gs.washington.edu/proj/avocado/data/avocado_full/). 
+This will yield imputations at 25 bp resolution across chromosome 19 for the assay H3K36me3 in cell type E004. These imputations will be the same as the ones provided in the [imputations folder](https://noble.gs.washington.edu/proj/avocado/data/avocado_full/). 
 
 ```
 >>> import numpy
@@ -45,8 +45,6 @@ array([ 0.11702165,  0.12218987,  0.12052223, ..., -0.06277314,
 ```
 
 Note that because the genome is so long the genome factors cannot fit entirely in memory. Accordingly, we have split the model into one per chromosome, where the neural network parameters, cell type embedding, and assay embedding, are shared from one chromosome to the next.
-
-This will
 
 The imputations are generally high quality and typically more accurate than competing methods. Below is an example of the imputation of H3K4me3 from ChromImpute, PREDICTD, and Avocado.
 

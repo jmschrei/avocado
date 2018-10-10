@@ -36,7 +36,7 @@ array([ 0.11702164,  0.12218985,  0.12052222, ..., -0.06277317,
 
 This will yield imputations at 25 bp resolution across chromosome 19 for the assay H3K36me3 in cell type E004. These imputations will be the same as the ones provided in the [imputations folder](https://noble.gs.washington.edu/proj/avocado/data/avocado_full/). 
 
-```
+```python
 >>> import numpy
 >>> data = numpy.load("H3K36me3/E004.H3K36me3.chr19.avocado.npz")['arr_0']
 >>> data

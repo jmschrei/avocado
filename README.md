@@ -89,8 +89,10 @@ The format of the training data is that of a dictionary where the keys are (cell
 >>> 
 >>> data = {}
 >>> for celltype, assay in itertools.product(celltypes, assays):
->>>    filename = 'data/{}.{}.pilot.arcsinh.npz'.format(celltype, assay)
->>>    data[(celltype, assay)] = numpy.load(filename)['arr_0']
+>>>	if celltype == "E065" and assay == "H3K4me3":
+>>>		continue
+>>>	filename = 'data/{}.{}.pilot.arcsinh.npz'.format(celltype, assay)
+>>> 	data[(celltype, assay)] = numpy.load(filename)['arr_0']
 ```
 
 Now you can fit your model to that data for some number of epochs, where an epoch is defined as some number of batches. Typically one wants to balance the epoch size and the batch size such that one epoch is equal to one pass over the genomic axis. The default training generator scans sequentially through the genome, randomly selecting experiments in the training set to train on at each position.

@@ -70,7 +70,7 @@ The cell type and assay embeddings will return simply the learned embeddings fro
 
 #### Training a new model
 
-Using Avocado is easy! We can initialize the model just by passing in a list of cell types, a list of assays, and specifying the various hyperparameters. The defaults for all of the hyperparameters are those that were used in the manuscript. Here is an example of creating a very small model thhat could potentially be trained on a CPU.
+Using Avocado is easy! We can initialize the model just by passing in a list of cell types, a list of assays, and specifying the various hyperparameters. The defaults for all of the hyperparameters are those that were used in the manuscript. Here is an example of creating a very small model that could potentially be trained on a CPU.
 
 ```python
 >>> from avocado import Avocado

@@ -4,7 +4,16 @@
 	<img src="figures/Avocado-Schematic.png" width="650"/>
 </p>
 
-Avocado is a multi-scale deep tensor factorization model that is used to learn a latent representation of the human epigenome. The purpose of this model is two fold; first, to impute epigenomic experiments that have not yet been performed, and second, to learn a latest representation of the human epigenome that can be used as input for machine learning models in the place of epigenomic data itself. The project page with links to the full set of imputations and model parameters can be found at https://noble.gs.washington.edu/proj/avocado/. The manuscript is currently under review and the preprint can be found [here](https://www.biorxiv.org/content/early/2018/07/08/364976).
+Avocado is a multi-scale deep tensor factorization model that is used to learn a latent representation of the human epigenome. The purpose of this model is two fold; first, to impute epigenomic experiments that have not yet been performed, and second, to learn a latest representation of the human epigenome that can be used as input for machine learning models in the place of epigenomic data itself. The manuscript is currently under review.
+
+[**Project Page**](https://noble.gs.washington.edu/proj/avocado/) <br>
+[**Preprint**](https://www.biorxiv.org/content/early/2018/07/08/364976) <br>
+[**ISMB 2018 Slides**](https://noble.gs.washington.edu/proj/avocado/Avocado_ISCB_2018_NoAnimation.pdf) <br>
+
+[**Model (incl. Latent Space)**](https://noble.gs.washington.edu/proj/avocado/model/) <br>
+[**Imputations**](https://noble.gs.washington.edu/proj/avocado/data/avocado_full/) (*Note: these imputations were generated from a model trained on 1,014 tracks from the full Roadmap compendium. If you would like the imputations as a result of five-fold cross-validation to baseline your approach against, please reach out to me*) <br>
+
+
 
 #### Installation
 

@@ -31,7 +31,6 @@ def data_generator(celltypes, assays, data, n_positions, batch_size):
 
 		yield d, value
 
-@jit
 def sequential_data_generator(celltypes, assays, data, n_positions, batch_size):
 	start = 0
 

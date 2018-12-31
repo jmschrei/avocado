@@ -39,8 +39,6 @@ def sequential_data_generator(celltypes, assays, data, n_positions, batch_size):
 
 	tracks = data.values()
 
-	print("hello there")
-
 	while True:
 		celltype_idxs      = numpy.zeros(batch_size, dtype='int32')
 		assay_idxs         = numpy.zeros(batch_size, dtype='int32')

@@ -4,16 +4,24 @@
 	<img src="figures/Avocado-Schematic.png" width="650"/>
 </p>
 
-Avocado is a multi-scale deep tensor factorization model that is used to learn a latent representation of the human epigenome. The purpose of this model is two fold; first, to impute epigenomic experiments that have not yet been performed, and second, to learn a latest representation of the human epigenome that can be used as input for machine learning models in the place of epigenomic data itself. The manuscript is currently under review.
+Avocado is a multi-scale deep tensor factorization model that is used to learn a latent representation of the human epigenome. The purpose of this model is two fold; first, to impute epigenomic experiments that have not yet been performed, and second, to learn a latest representation of the human epigenome that can be used as input for machine learning models in the place of epigenomic data itself. 
 
 [**Project Page**](https://noble.gs.washington.edu/proj/avocado/) <br>
-[**Preprint**](https://www.biorxiv.org/content/early/2018/07/08/364976) <br>
 [**ISMB 2018 Slides**](https://noble.gs.washington.edu/proj/avocado/Avocado_ISCB_2018_NoAnimation.pdf) <br>
 
-[**Model (incl. Latent Space)**](https://noble.gs.washington.edu/proj/avocado/model/) <br>
-[**Imputations**](https://noble.gs.washington.edu/proj/avocado/data/avocado_full/) (*Note: these imputations were generated from a model trained on 1,014 tracks from the full Roadmap compendium. If you would like the imputations as a result of five-fold cross-validation to baseline your approach against, please reach out to me*) <br>
+We have applied Avocado to two data sets so far. The first was the Roadmap compendium, containing 1,014 tracks of epigenomic data that include chromatin accessibility (DNase-seq) and histone modification (ChIP-seq). The second was the ENCODE3 compendium, containing 3,814 tracks of epigenomic data that include chromatin accessibility (DNase-seq and ATAC-seq), histone modification (ChIP-seq), transcription factor and other protein binding (ChIP-seq), and transcription (various RNA-seq, CAGE, RAMPAGE). 
 
+Both manuscripts are currently under review.
 
+[**Multi-scale deep tensor factorization learns a latent representation of the human epigenome**](https://www.biorxiv.org/content/early/2018/07/08/364976) <br>
+
+[**Model (including the learned latent space)**](https://noble.gs.washington.edu/proj/avocado/model/) <br>
+[**Imputations of the Roadmap Compendium**](https://noble.gs.washington.edu/proj/avocado/data/avocado_full/) (*Note: these imputations were generated from a model trained on 1,014 tracks from the full Roadmap compendium. If you would like the imputations as a result of five-fold cross-validation to baseline your approach against, please reach out to me*) <br>
+
+[**Completing the ENCODE3 compendium yields accurate imputations across a variety of assays and human biosamples**](https://www.biorxiv.org/content/10.1101/533273v1)
+
+**Model (including the learned latent space)** Currently being completed. <br>
+**Imputations of the ENCODE3 Compendium** Currently being completed <br>
 
 #### Installation
 

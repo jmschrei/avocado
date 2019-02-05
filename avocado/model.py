@@ -329,7 +329,7 @@ class Avocado(object):
 		self.model.summary()
 
 	def fit(self, X_train, X_valid=None, n_epochs=200, epoch_size=120,
-		verbose=1, callbacks=None, **kwargs):
+		verbose=1, callbacks=None, data_generator=None, **kwargs):
 		"""Fit the model to the given epigenomic tracks.
 
 		Pass in a dictionary of training data and an optional dictionary of
@@ -359,10 +359,15 @@ class Avocado(object):
 		verbose: int, optional
 			The verbosity level of training. Must be one of 0, 1, or 2, where 0
 			means silent, 1 means progress bar, and 2 means use only one line
-			per epoch.
+			per epoch. Default is 1.
 
 		callbacks : list or None, optional
 			A list of keras callback instances to be called during training. 
+
+		data_generator : generator or None, optional
+			A custom data generator object to be used in the place of the
+			default generator. This will only change the training generator,
+			not the validation generator. Default is None.
 
 		**kwargs : optional
 			Any other keyword arguments to be passed into the `fit_generator`
@@ -420,8 +425,9 @@ class Avocado(object):
 						"positions".format(celltype, assay, len(track), 
 							self.n_genomic_positions))
 
-		X_train_gen = sequential_data_generator(self.celltypes, self.assays, 
-			X_train, self.n_genomic_positions, self.batch_size)
+
+		X_train_gen = data_generator or sequential_data_generator(self.celltypes, 
+			self.assays, X_train, self.n_genomic_positions, self.batch_size)
 
 		if X_valid is not None:
 			X_valid_gen = data_generator(self.celltypes, self.assays, 

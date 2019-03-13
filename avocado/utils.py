@@ -52,9 +52,9 @@ def download_bigWig(url, download_filepath='.', chroms=chroms,
 
 		if chrom_lengths is not None:
 			if chrom != 'X':
-				data_ = numpy.zeros(chromosome_lengths[chrom-1])
+				data_ = numpy.zeros(chrom_lengths[chrom - 1])
 			else:
-				data_ = numpy.zeros(chromosome_lengths[-1])
+				data_ = numpy.zeros(chrom_lengths[-1])
 
 			data_[:len(data)] = data
 			data = data_
@@ -67,9 +67,9 @@ def download_bigWig(url, download_filepath='.', chroms=chroms,
 		os.system("rm {}".format(bedgraph))
 
 	if verbose == True:
-		print("rm {}".format(bigWig))
+		print("rm {}".format(bigwig))
 
-	os.system("rm {}".format(bigWig))
+	os.system("rm {}".format(bigwig))
 	return chrom_data
 
 def bedgraph_to_dense(filename, verbose=True):

@@ -13,7 +13,8 @@ import os
 
 from tqdm import tqdm
 
-chroms = range(1, 23) + ['X']
+chroms = list(range(1, 23)) + ['X']
+
 
 def download_bigWig(url, download_filepath='.', chroms=chroms, 
 	chrom_lengths=None, verbose=True):

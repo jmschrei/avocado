@@ -46,13 +46,13 @@ def build_model(n_celltypes, n_celltype_factors, n_assays, n_assay_factors,
 	genome_25bp = Flatten()(genome_25bp_embedding(genome_25bp_input))
 
 	genome_250bp_input = Input(shape=(1,), name="genome_250bp_input")
-	genome_250bp_embedding = Embedding((n_genomic_positions / 10) + 1,
+	genome_250bp_embedding = Embedding(int(n_genomic_positions / 10) + 1,
 		n_250bp_factors, input_length=1, name="genome_250bp_embedding")
 	genome_250bp_embedding.trainable = not freeze_genome_250bp
 	genome_250bp = Flatten()(genome_250bp_embedding(genome_250bp_input))
 
 	genome_5kbp_input = Input(shape=(1,), name="genome_5kbp_input")
-	genome_5kbp_embedding = Embedding((n_genomic_positions / 200) + 1, 
+	genome_5kbp_embedding = Embedding(int(n_genomic_positions / 200) + 1, 
 		n_5kbp_factors, input_length=1, name="genome_5kbp_embedding")
 	genome_5kbp_embedding.trainable = not freeze_genome_5kbp
 	genome_5kbp = Flatten()(genome_5kbp_embedding(genome_5kbp_input))

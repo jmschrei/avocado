@@ -858,7 +858,7 @@ class Avocado(object):
 		"""
 
 		if end is not None and end <= start:
-			raise ValueError("When given, the end coordinate must be greater"/
+			raise ValueError("When given, the end coordinate must be greater" \
 				" than the start coordinate.")
 
 		if end is None:
@@ -867,8 +867,8 @@ class Avocado(object):
 		celltype_idx = self.celltypes.index(celltype)
 		assay_idx = self.assays.index(assay)
 
-		celltype_idxs = numpy.ones(self.n_genomic_positions) * celltype_idx
-		assay_idxs = numpy.ones(self.n_genomic_positions) * assay_idx
+		celltype_idxs = numpy.ones(end-start) * celltype_idx
+		assay_idxs = numpy.ones(end-start) * assay_idx
 
 		genomic_25bp_idxs  = numpy.arange(start, end)
 		genomic_250bp_idxs = numpy.arange(start, end) // 10

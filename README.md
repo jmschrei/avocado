@@ -71,7 +71,7 @@ The imputations are generally high quality and typically more accurate than comp
 ### Using the learned latent representation
 
 <p align="center">
-	<img src="figures/avocado-embeddings.png" width="550"/>
+	<img src="figures/avocado-embeddings.png" width="800"/>
 </p>
 
 The learned cell type representation is shown above. Each of the points corresponds to a cell type included in the model, and are colored by their function. As you can see, they cluster very well according to this function. All three embeddings can be extracted from the commands using the following simple commands:

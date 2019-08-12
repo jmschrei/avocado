@@ -1,5 +1,4 @@
 import numpy
-from numba import jit
 
 def data_generator(celltypes, assays, data, n_positions, batch_size):
 	while True:

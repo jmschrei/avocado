@@ -443,7 +443,7 @@ class Avocado(object):
 				workers=1, pickle_safe=True, verbose=verbose, 
 				callbacks=callbacks, **kwargs)
 
-		self.experiments = list(training_data.keys())
+		self.experiments = list(X_train.keys())
 		return history
 
 	def fit_celltypes(self, X_train, X_valid=None, n_epochs=200, epoch_size=120,
@@ -1047,8 +1047,11 @@ class Avocado(object):
 		with open("{}.json".format(name), "r") as infile:
 			d = json.load(infile)
 
-		experiments = d['experiments']
-		del d['experiments']
+		if 'experiments' in d:
+			experiments = d['experiments']
+			del d['experiments']
+		else:
+			experiments = []
 
 		model = Avocado(freeze_celltypes=freeze_celltypes,
 						freeze_assays=freeze_assays,

@@ -923,6 +923,7 @@ class Avocado(object):
 		d = {
 			'celltypes': self.celltypes,
 			'assays': self.assays,
+			'experiments': self.experiments,
 			'n_celltype_factors': self.n_celltype_factors,
 			'n_assay_factors': self.n_assay_factors,
 			'n_genomic_positions': self.n_genomic_positions,
@@ -1046,6 +1047,9 @@ class Avocado(object):
 		with open("{}.json".format(name), "r") as infile:
 			d = json.load(infile)
 
+		experiments = d['experiments']
+		del d['experiments']
+
 		model = Avocado(freeze_celltypes=freeze_celltypes,
 						freeze_assays=freeze_assays,
 						freeze_genome_25bp=freeze_genome_25bp,
@@ -1054,5 +1058,6 @@ class Avocado(object):
 						freeze_network=freeze_network,
 						**d)
 
+		model.experiments = experiments
 		model.model = keras.models.load_model("{}.h5".format(name))
 		return model

@@ -189,6 +189,7 @@ class Avocado(object):
 
 		self.celltypes = list(celltypes)
 		self.assays = list(assays)
+		self.experiments = []
 
 		self.n_celltypes = len(celltypes)
 		self.n_assays = len(assays)
@@ -442,6 +443,7 @@ class Avocado(object):
 				workers=1, pickle_safe=True, verbose=verbose, 
 				callbacks=callbacks, **kwargs)
 
+		self.experiments = list(training_data.keys())
 		return history
 
 	def fit_celltypes(self, X_train, X_valid=None, n_epochs=200, epoch_size=120,
@@ -629,6 +631,7 @@ class Avocado(object):
 			else:
 				new_layer.set_weights(old_layer.get_weights())
 
+		model.experiments = self.experiments + list(X_train.keys())
 		self.model = model
 		return history
 
@@ -817,6 +820,7 @@ class Avocado(object):
 			else:
 				new_layer.set_weights(old_layer.get_weights())
 
+		model.experiments = self.experiments + list(X_train.keys())
 		self.model = model
 		return history
 

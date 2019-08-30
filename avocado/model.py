@@ -46,13 +46,13 @@ def build_model(n_celltypes, n_celltype_factors, n_assays, n_assay_factors,
 	genome_25bp = Flatten()(genome_25bp_embedding(genome_25bp_input))
 
 	genome_250bp_input = Input(shape=(1,), name="genome_250bp_input")
-	genome_250bp_embedding = Embedding((n_genomic_positions / 10) + 1,
+	genome_250bp_embedding = Embedding(int(n_genomic_positions / 10) + 1,
 		n_250bp_factors, input_length=1, name="genome_250bp_embedding")
 	genome_250bp_embedding.trainable = not freeze_genome_250bp
 	genome_250bp = Flatten()(genome_250bp_embedding(genome_250bp_input))
 
 	genome_5kbp_input = Input(shape=(1,), name="genome_5kbp_input")
-	genome_5kbp_embedding = Embedding((n_genomic_positions / 200) + 1, 
+	genome_5kbp_embedding = Embedding(int(n_genomic_positions / 200) + 1, 
 		n_5kbp_factors, input_length=1, name="genome_5kbp_embedding")
 	genome_5kbp_embedding.trainable = not freeze_genome_5kbp
 	genome_5kbp = Flatten()(genome_5kbp_embedding(genome_5kbp_input))
@@ -824,7 +824,7 @@ class Avocado(object):
 		self.model = model
 		return history
 
-	def predict(self, celltype, assay, verbose=0):
+	def predict(self, celltype, assay, start=0, end=None, verbose=0):
 		"""Predict a track of epigenomic data.
 
 		This will predict a track of epigenomic data, resulting in one signal
@@ -842,6 +842,15 @@ class Avocado(object):
 			The assay to be imputed. Must be one of the elements from the list
 			of assays passed in upon model initialization.
 
+		start : int, optional
+			The start position to begin the imputation at. By default this is 0,
+			corresponding to the start of the track. The value is which 25 bp
+			bin to begin prediction at, not the raw genomic coordinate.
+
+		end : int or None, optional
+			The end position to stop making imputations at, exclusive. By default
+			this is None, meaning to end at `self.n_genomic_positions.`. 
+
 		verbose : int, optional
 			The verbosity level of the prediction. Must be 0 or 1.
 
@@ -852,15 +861,22 @@ class Avocado(object):
 			cell type and assay for the considered genomic positions.
 		"""
 
+		if end is not None and end <= start:
+			raise ValueError("When given, the end coordinate must be greater" \
+				" than the start coordinate.")
+
+		if end is None:
+			end = self.n_genomic_positions
+
 		celltype_idx = self.celltypes.index(celltype)
 		assay_idx = self.assays.index(assay)
 
-		celltype_idxs = numpy.ones(self.n_genomic_positions) * celltype_idx
-		assay_idxs = numpy.ones(self.n_genomic_positions) * assay_idx
+		celltype_idxs = numpy.ones(end-start) * celltype_idx
+		assay_idxs = numpy.ones(end-start) * assay_idx
 
-		genomic_25bp_idxs  = numpy.arange(self.n_genomic_positions)
-		genomic_250bp_idxs = numpy.arange(self.n_genomic_positions) / 10
-		genomic_5kbp_idxs  = numpy.arange(self.n_genomic_positions) / 200
+		genomic_25bp_idxs  = numpy.arange(start, end)
+		genomic_250bp_idxs = numpy.arange(start, end) // 10
+		genomic_5kbp_idxs  = numpy.arange(start, end) // 200
 
 		X = {
 			'celltype_input': celltype_idxs, 

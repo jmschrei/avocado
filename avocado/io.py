@@ -1,5 +1,4 @@
 import numpy
-from numba import jit
 
 def data_generator(celltypes, assays, data, n_positions, batch_size):
 	while True:
@@ -37,7 +36,7 @@ def sequential_data_generator(celltypes, assays, data, n_positions, batch_size):
 	indices = numpy.array([[celltypes.index(celltype) for celltype, _ in data.keys()],
 		                   [assays.index(assay) for _, assay in data.keys()]])
 
-	tracks = data.values()
+	tracks = list(data.values())
 
 	while True:
 		celltype_idxs      = numpy.zeros(batch_size, dtype='int32')

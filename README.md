@@ -6,19 +6,18 @@
 
 Avocado is a multi-scale deep tensor factorization model that is used to learn a latent representation of the human epigenome. The purpose of this model is two fold; first, to impute epigenomic experiments that have not yet been performed, and second, to learn a latest representation of the human epigenome that can be used as input for machine learning models in the place of epigenomic data itself. 
 
-[**Project Page**](https://noble.gs.washington.edu/proj/avocado/) <br>
 [**ISMB 2018 Slides**](https://noble.gs.washington.edu/proj/avocado/Avocado_ISCB_2018_NoAnimation.pdf) <br>
 
-We have applied Avocado to two data sets so far. The first was the Roadmap compendium, containing 1,014 tracks of epigenomic data that include chromatin accessibility (DNase-seq) and histone modification (ChIP-seq). The second was the ENCODE3 compendium, containing 3,814 tracks of epigenomic data that include chromatin accessibility (DNase-seq and ATAC-seq), histone modification (ChIP-seq), transcription factor and other protein binding (ChIP-seq), and transcription (various RNA-seq, CAGE, RAMPAGE). 
-
-Both manuscripts are currently under review.
-
 1. [**Multi-scale deep tensor factorization learns a latent representation of the human epigenome**](https://www.biorxiv.org/content/early/2018/07/08/364976) <br>
+
+This model was trained on 1,014 tracks of epigenomic data from the Roadmap Epigenomics Mapping Consortium (REMC) that include chromatin accessibility (DNase-seq) and 23 tracks of histone modification (ChIP-seq) from 127 human primary cell lines and tissues.
 
 [**Model (including the learned latent space)**](https://noble.gs.washington.edu/proj/avocado/model/) <br>
 [**Imputations of the Roadmap Compendium**](https://noble.gs.washington.edu/proj/avocado/data/avocado_full/) (*Note: these imputations were generated from a model trained on 1,014 tracks from the full Roadmap compendium. If you would like the imputations as a result of five-fold cross-validation to baseline your approach against, please reach out to me*) <br>
 
 2. [**Completing the ENCODE3 compendium yields accurate imputations across a variety of assays and human biosamples**](https://www.biorxiv.org/content/10.1101/533273v1)
+
+This model was trained on 3,814 tracks of epigenomic data from the ENCODE Compendium that include chromatin accessibility (DNase-seq and ATAC-seq), measurements of gene transcription (including CAGE, RAMPAGE, polyA-depleted, etc.), histone modifications, and DNA-binding proteins such as transcription factors. 
 
 **Model (including the learned latent space)** Currently being completed. <br>
 **Imputations of the ENCODE3 Compendium** Currently being completed <br>
@@ -31,7 +30,7 @@ Avocado can be installed using pip.
 pip install avocado-epigenome
 ```
 
-#### Imputing epigenomic data
+### Imputing epigenomic data
 
 Avocado can impute signal values for epigenomic experiments that have not yet been performed with high accuracy. These imputations are of arcsinh transformed -log10 p-values at 25 bp resolution and cover the entirety of chromosomes 1 through 22. Making imputations with a pre-trained model requires only two lines; loading the model, and calling the predict method. We can start by loading up the [pre-trained model](https://noble.gs.washington.edu/proj/avocado/model/) for chromosome 19.
 
@@ -69,10 +68,10 @@ The imputations are generally high quality and typically more accurate than comp
 	<img src="figures/Avocado-imputations.png" width="800"/>
 </p>
 
-#### Using the learned latent representation
+### Using the learned latent representation
 
 <p align="center">
-	<img src="figures/Avocado-celltypes.png" width="550"/>
+	<img src="figures/avocado-embeddings.png" width="900"/>
 </p>
 
 The learned cell type representation is shown above. Each of the points corresponds to a cell type included in the model, and are colored by their function. As you can see, they cluster very well according to this function. All three embeddings can be extracted from the commands using the following simple commands:

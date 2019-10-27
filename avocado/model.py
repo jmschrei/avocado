@@ -8,8 +8,10 @@ of the human epigenome. This file has functions for building a deep tensor
 factorization model.
 """
 
-from .io import sequential_data_generator
 from .io import data_generator
+from .io import permuted_data_generator
+from .io import sequential_data_generator
+
 
 import json
 import numpy
@@ -330,7 +332,8 @@ class Avocado(object):
 		self.model.summary()
 
 	def fit(self, X_train, X_valid=None, n_epochs=200, epoch_size=120,
-		verbose=1, callbacks=None, input_generator=None, **kwargs):
+		verbose=1, callbacks=None, sampling='sequential', input_generator=None, 
+		**kwargs):
 		"""Fit the model to the given epigenomic tracks.
 
 		Pass in a dictionary of training data and an optional dictionary of
@@ -363,7 +366,22 @@ class Avocado(object):
 			per epoch. Default is 1.
 
 		callbacks : list or None, optional
-			A list of keras callback instances to be called during training. 
+			A list of keras callback instances to be called during training.
+
+		sampling : str, optional
+			The sampling strategy to use for the generators. Must be one of the
+			following:
+
+				'sequential' : Sequentially scans through the genome indexes,
+					selecting a cell type and assay randomly at each position
+				'permuted' : Sequentially scans through a permuted version
+					of the genome indexes, such that each epoch sees every
+					genomic index once, but each batch sees nearly random 
+					indexes
+				'random' : Randomly selects genomic positions. No guarantee
+					on the number of times each position has been seen. 
+
+			Default is 'sequential'.
 
 		input_generator : generator or None, optional
 			A custom data generator object to be used in the place of the
@@ -426,9 +444,20 @@ class Avocado(object):
 						"positions".format(celltype, assay, len(track), 
 							self.n_genomic_positions))
 
-
-		X_train_gen = input_generator or sequential_data_generator(self.celltypes, 
-			self.assays, X_train, self.n_genomic_positions, self.batch_size)
+		if input_generator is not None:
+			X_train_gen = input_generator
+		elif sampling == 'sequential':
+			X_train_gen = sequential_data_generator(self.celltypes, 
+				self.assays, X_train, self.n_genomic_positions, 
+				self.batch_size)
+		elif sampling == 'permuted':
+			X_train_gen = permuted_data_generator(self.celltypes, 
+				self.assays, X_train, self.n_genomic_positions, 
+				self.batch_size)
+		elif sampling == 'random':
+			X_train_gen = permuted_data_generator(self.celltypes, 
+				self.assays, X_train, self.n_genomic_positions, 
+				self.batch_size)			
 
 		if X_valid is not None:
 			X_valid_gen = data_generator(self.celltypes, self.assays, 

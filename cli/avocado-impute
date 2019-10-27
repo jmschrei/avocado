@@ -1,0 +1,172 @@
+#!/usr/bin/env python
+# avocado.py
+# Author: Jacob Schreiber <jmschr@cs.washington.edu>
+
+"""
+This command line application will allow you to make imputations using a
+pre-trained Avocado model. There are currently two models supported
+"""
+
+import os
+import sys
+import numpy
+import argparse
+
+from tqdm import trange
+
+
+if __name__ != '__main__':
+	sys.exit()
+
+desc = """Avocado is a deep tensor factorization method for modeling large
+	compendia of epigenomic and transcriptomic data sets. Avocado organizes 
+	the compedia into a three dimensional tensor with the axes being cell types, 
+	assays, and the full length of the genome. By factorizing the data, Avocado
+	is able to learn low dimensional "latent" representations of each axis
+	independently of the other axes. This allows the model to impute 
+	any genome-wide epigenomics experiments that has not yet been performed.
+
+	This program will allow you to use pre-trained models to make imputations
+	of genome-wide tracks for any pair of cell type and assay that the model
+	was trained on. See the GitHub repository for a list of cell lines and
+	assays included in each model.""" 
+
+# Describe the arguments into the program.
+parser = argparse.ArgumentParser(description=desc)
+parser.add_argument('-f', '--filename', type=str, default=None,
+	help="The name of a tab-delimited file that has all experiments to impute, " \
+	     "one per row, with the cell type first followed by the assay. Optionally, " \
+	     "there can be a third column for the name of the file." )
+parser.add_argument('-c', '--celltype', type=str, default=None,
+	help="The cell type (biosample) to make the imputation in.")
+parser.add_argument('-a', '--assay', type=str, default=None,
+	help="The type of assay to impute.")
+parser.add_argument('-s', '--chrom_sizes', type=str,
+	help="A file of chromosome sizes to be used by bedGraphToBigWig, e.g., hg19.chrom.sizes")
+parser.add_argument('-m', '--model', type=str, choices=['roadmap-hg19', 'encode-hg38'], default='roadmap-hg19', 
+	help="The Avocado model to use, either trained on data from the Roadmap" \
+		" compendium aligned to hg19, or from the ENCODE compendium aligned to" \
+		" hg38. Note that this will set the default value for `chrom-sizes`" \
+		" unless a value is provided.")
+parser.add_argument('-p', '--model_path', type=str, default='None',
+	help="The path where the model files are stored.")
+parser.add_argument('-r', '--arcsinh', action='store_true', default=False,
+	help="Whether the imputations are arcsinh-transformed -log10 p-values," \
+		" which is the space that the model is trained in, or the original" \
+		" -log10 p-value space. Default is -log10 p-values.")
+parser.add_argument('-n', '--name', type=str, default=None,
+	help="The name of the resulting imputation bigwig. Default is <celltype>.<assay>.bigwig")
+parser.add_argument('-v', '--verbose', action='store_true', default=False,
+	help="Whether to print out log messages during the imputation.")
+parser.add_argument('-x', '--include_x', action='store_true', default=False,
+	help="Whether to make imputations for chrX. Default is False.")
+parser.add_argument('-d', '--device', type=str, default='cuda',
+	help="A flag that is passed to THEANO_FLAGS indicating what device " \
+		"to run the imputation on. Default is 'cuda'.")
+
+# Pull the arguments.
+args = parser.parse_args()
+
+os.environ['THEANO_FLAGS'] = "device={}".format(args.device)
+
+from avocado import Avocado
+
+# Fix the inputs to be consistent.
+if args.name is None:
+	args.name = '{}.{}.bigwig'.format(args.celltype, args.assay)
+
+if args.chrom_sizes is None:	
+	if args.model == 'roadmap-hg19':
+		if args.model_path == 'None':
+			args.model_path = '.roadmap-model/'
+		args.chrom_sizes = args.model_path + '/hg19.chrom.sizes'
+		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/model/avocado-{}'
+	elif args.model == 'encode-hg38':
+		if args.model_path == 'None':
+			args.model_path = '.encode-model/'
+		args.chrom_sizes = args.model_path + '/hg38.chrom.sizes'
+		args.download_path = 'https://noble.gs.washington.edu/proj/mango/models/avocado-{}'
+		args.include_x = True
+
+# If the user has passed in a file of experiments to impute...
+if args.filename is not None:
+	celltypes, assays, names = [], [], []
+	with open(args.filename, "r") as infile:
+		for line in infile:
+			line = line.strip("\r\n").split()
+			celltype, assay = line[:2]
+
+			if len(line) == 2: # No name provided, use default names.
+				name = "{}.{}.bigwig".format(celltype, assay)
+			elif len(line) == 3: # Name provided, use that instead.
+				name = line[2]
+			else:
+				raise ValueError("The file with experiments to impute must " \
+					"have only two or three columns.")
+
+			celltypes.append(celltype)
+			assays.append(assay)
+			names.append(name)
+
+# If the user only wants to impute a single experiment...
+else:
+	celltypes = [args.celltype]
+	assays = [args.assay]
+	if args.name is None:
+		names = ["{}.{}.bigwig".format(args.celltype, args.assay)]
+	else:
+		names = [args.name]
+
+
+chroms = ['chr{}'.format(i) for i in [1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 
+	19, 2, 20, 21, 22, 3, 4, 5, 6, 7, 8, 9]]
+
+if args.include_x == True:
+	chroms += ['chrX']
+
+# Download the model if not already downloaded.
+for chrom in chroms:
+	if not os.path.isfile("{}/avocado-{}.json".format(args.model_path, chrom)):
+		print("Warning: Model file for Avocado {} not found. Downloading from https://noble.gs.washington.edu/proj/avocado/model.".format(chrom))
+		os.system("wget -P {} {}.h5".format(args.model_path, args.download_path.format(chrom)))
+		os.system("wget -P {} {}.json".format(args.model_path, args.download_path.format(chrom)))
+
+# Download the chromosome size file if not already downloaded
+if not os.path.isfile(args.chrom_sizes):
+	print("Warning: chromosome size file not found. Downloading...")
+	if args.model == 'roadmap-hg19':
+		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes".format(args.model_path))
+	elif args.model == 'encode-hg38':
+		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes".format(args.model_path))
+
+
+# Make predictions and write them out to a bedgraph file
+for chrom in chroms:
+	if args.verbose:
+		print("Loading model file {}/avocado-{}...".format(args.model_path, chrom))
+
+	model = Avocado.load("{}/avocado-{}".format(args.model_path, chrom))
+
+	for celltype, assay, name in zip(celltypes, assays, names):
+		name = name.replace(".bigwig", "")
+		mode = 'w' if chrom == chroms[0] else 'a'
+
+		with open(".{}.bedgraph".format(name), mode) as outfile:
+			y_hat = model.predict(celltype, assay, verbose=args.verbose)
+
+			if args.arcsinh == False:
+				y_hat = numpy.sinh(y_hat)
+
+			desc = "{} {} {}".format(celltype, assay, chrom)
+			for i in trange(y_hat.shape[0], desc=desc, disable=not args.verbose):
+				outfile.write("{}\t{}\t{}\t{}\n".format(chrom, i*25, (i+1)*25, y_hat[i]))
+
+# Run bedgraphToBigWig to convert each bedgraph file to a bigwig
+cmd = "bedGraphToBigWig .{0}.bedgraph {1} {0}.bigwig"
+for celltype, assay, name in zip(celltypes, assays, names):
+	if args.verbose:
+		print("Converting {} {} from bedgraph to bigwig...".format(celltype, assay))
+
+	name = name.replace(".bigwig", "")
+	os.system(cmd.format(name, args.chrom_sizes))
+	os.system("rm .{}.bedgraph".format(name))

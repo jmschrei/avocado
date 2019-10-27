@@ -4,8 +4,9 @@
 	<img src="figures/Avocado-Schematic.png" width="650"/>
 </p>
 
-Avocado is a multi-scale deep tensor factorization model that is used to learn a latent representation of the human epigenome. The purpose of this model is two fold; first, to impute epigenomic experiments that have not yet been performed, and second, to learn a latest representation of the human epigenome that can be used as input for machine learning models in the place of epigenomic data itself. 
+Avocado is a multi-scale deep tensor factorization method for learning a latent representation of the human epigenome. The purpose of this model is two fold; first, to impute epigenomic experiments that have not yet been performed, and second, to learn a latest representation of the human epigenome that can be used as input for machine learning models in the place of epigenomic data itself. 
 
+This approach has been used in several contexts. If available, the pre-trained models and resulting imputations are below.
 
 1. [Multi-scale deep tensor factorization learns a latent representation of the human epigenome](https://www.biorxiv.org/content/early/2018/07/08/364976) [**[model]**](https://noble.gs.washington.edu/proj/avocado/model/) [**[imputations]**](https://noble.gs.washington.edu/proj/avocado/data/avocado_full/)  <br>
 
@@ -29,7 +30,11 @@ pip install avocado-epigenome
 
 #### Imputing epigenomic data
 
-Avocado can impute genome-wide epigenomic and transcriptomic experiments that have not yet been performed. These imputations are of arcsinh transformed -log10 p-values at 25 bp resolution. The arcsinh transform has been shown to stabilize the variance across replicates but can be easily undone to return to get -log10 p-values. 
+Avocado can impute genome-wide epigenomic and transcriptomic experiments that have not yet been performed, allowing for the computational characterization of human epigenomics on a massive scale. These imputations are of -log10 p-values at 25 bp resolution that have been arcsinh transformed to stablize the variance and are generally high quality when compared with competing methods. Below is an example of the imputation of H3K4me3 in IMR90 from ChromImpute, PREDICTD, and Avocado as well as the MSE of the imputations in the displayed region. The experimental signal is shown in faded blue in each panel to compare to the imputations.
+
+<p align="center">
+	<img src="figures/Avocado-imputations.png" width="800"/>
+</p>
 
 Imputations can be made in two ways. The first is the command line tool that is available in the `cli` folder and the second is using the Python interface.
 
@@ -69,13 +74,7 @@ array([ 0.11702165,  0.12218987,  0.12052223, ..., -0.06277314,
        -0.06284001, -0.06013602], dtype=float32)
 ```
 
-Note that because the genome is so long the genome factors cannot fit entirely in memory. Accordingly, we have split the model into one per chromosome, where the neural network parameters, cell type embedding, and assay embedding, are shared from one chromosome to the next.
-
-The imputations are generally high quality and typically more accurate than competing methods. Below is an example of the imputation of H3K4me3 from ChromImpute, PREDICTD, and Avocado.
-
-<p align="center">
-	<img src="figures/Avocado-imputations.png" width="800"/>
-</p>
+Note that because the genome is so long the genome factors cannot fit entirely in memory. Accordingly, we have split the model into one file per chromosome, where the neural network parameters, cell type embedding, and assay embedding are shared from one chromosome to the next. In order to make imputations genome-wide, one would need to load up and then make imputations for each chromosome separately.
 
 #### Using the learned latent representation
 
@@ -83,7 +82,11 @@ The imputations are generally high quality and typically more accurate than comp
 	<img src="figures/avocado-embeddings.png" width="900"/>
 </p>
 
-The learned cell type representation is shown above. Each of the points corresponds to a cell type included in the model, and are colored by their function. As you can see, they cluster very well according to this function. All three embeddings can be extracted from the commands using the following simple commands:
+During the training process, Avocado learns a low-dimensional latent representation of each axis of the tensor: the cell types, the assays, and the genomic positions. Each axis is independent of the other two; for example, the representations of genomic positions is based on data from all available assays in all cell types. Thus, the learned genome representation is cell type agnostic. 
+
+Projections of the learned genomic position, cell type, and assay representations are shown above for the model trained using Roadmap data. In each panel, a point corresponds to either a single genomic locus, assay, or cell type. 
+
+All three embeddings can be extracted from the commands using the following simple commands:
 
 ```python
 >>> genome_embedding = model.genome_embedding

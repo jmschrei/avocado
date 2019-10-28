@@ -2,13 +2,15 @@
 
 `avocado-impute` is a command line interface (CLI) that uses a pre-trained Avocado model to make imputations. This program handles the loading of and imputation using models for each chromosome and outputs a single bigwig file for each experiment. These bigwig files contain the genome-wide signal for the specified experiment at 25-bp resolution.
 
-This tool gets automatically installed when you use `pip` to install avocado-epigenome v0.3.2 or later (`pip install avocado-epigenome` should be sufficient if you do not already have the package installed) and can be used on the command line anywhere. It is the simplest way to make imputations from a pre-trained model. For example:
+This tool gets automatically installed when you use `pip` to install avocado-epigenome v0.3.2 or later (`pip install avocado-epigenome` should work) and can be used on the command line anywhere. It is the simplest way to make imputations from a pre-trained model. For example:
 
 ```
-avocado-impute -c E003 -a H3K36me3
+avocado-impute -c J004 -a ChIP-seq_ELF1_signal_p-value
 ```
 
-will make imputations for H3K36me3 in the Roadmap cell type "E003" without any fuss. The output will be a bigwig file `E003.H3K36me3.bigwig` in the same directory that the file was run.
+will make imputations for elongation factor 1 (ELF1) in K562 without any fuss. The output will be a bigwig file `J004.ChIP-seq_ELF1_signal_p-value.bigwig` in the same directory that the file was run.
+
+A full list of cell types (biosamples) and assays that imputations can be made for can be found in the encode2018core-biosamples and encode2018core-assays, if you're using the encode2018core model (the default) or in Roadmap-biosamples and Roadmap-assays if you're using the Roadmap model.
 
 The high level usage instructions are as follows:
 

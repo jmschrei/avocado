@@ -43,7 +43,8 @@ parser.add_argument('-a', '--assay', type=str, default=None,
 	help="The type of assay to impute.")
 parser.add_argument('-s', '--chrom_sizes', type=str,
 	help="A file of chromosome sizes to be used by bedGraphToBigWig, e.g., hg19.chrom.sizes")
-parser.add_argument('-m', '--model', type=str, choices=['roadmap-hg19', 'encode-hg38'], default='roadmap-hg19', 
+parser.add_argument('-m', '--model', type=str, choices=['roadmap-hg19', 'encode2018core-hg38', 
+	'custom'], default='encode2018core-hg38', 
 	help="The Avocado model to use, either trained on data from the Roadmap" \
 		" compendium aligned to hg19, or from the ENCODE compendium aligned to" \
 		" hg38. Note that this will set the default value for `chrom-sizes`" \
@@ -81,9 +82,9 @@ if args.chrom_sizes is None:
 			args.model_path = '.roadmap-model/'
 		args.chrom_sizes = args.model_path + '/hg19.chrom.sizes'
 		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/model/avocado-{}'
-	elif args.model == 'encode-hg38':
+	elif args.model == 'encode2018core-hg38':
 		if args.model_path == 'None':
-			args.model_path = '.encode-model/'
+			args.model_path = '.encode2018core-model/'
 		args.chrom_sizes = args.model_path + '/hg38.chrom.sizes'
 		args.download_path = 'https://noble.gs.washington.edu/proj/mango/models/avocado-{}'
 		args.include_x = True
@@ -136,7 +137,7 @@ if not os.path.isfile(args.chrom_sizes):
 	print("Warning: chromosome size file not found. Downloading...")
 	if args.model == 'roadmap-hg19':
 		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes".format(args.model_path))
-	elif args.model == 'encode-hg38':
+	elif args.model == 'encode2018core-hg38':
 		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes".format(args.model_path))
 
 

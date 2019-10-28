@@ -16,7 +16,8 @@ The high level usage instructions are as follows:
 
 ```
 usage: avocado-impute [-h] [-f FILENAME] [-c CELLTYPE] [-a ASSAY]
-                      [-s CHROM_SIZES] [-m {roadmap-hg19,encode-hg38}]
+                      [-s CHROM_SIZES]
+                      [-m {roadmap-hg19,encode2018core-hg38,custom}]
                       [-p MODEL_PATH] [-r] [-n NAME] [-v] [-x] [-d DEVICE]
 
 Avocado is a deep tensor factorization method for modeling large compendia of
@@ -44,7 +45,7 @@ optional arguments:
   -s CHROM_SIZES, --chrom_sizes CHROM_SIZES
                         A file of chromosome sizes to be used by
                         bedGraphToBigWig, e.g., hg19.chrom.sizes
-  -m {roadmap-hg19,encode-hg38}, --model {roadmap-hg19,encode-hg38}
+  -m {roadmap-hg19,encode2018core-hg38,custom}, --model {roadmap-hg19,encode2018core-hg38,custom}
                         The Avocado model to use, either trained on data from
                         the Roadmap compendium aligned to hg19, or from the
                         ENCODE compendium aligned to hg38. Note that this will

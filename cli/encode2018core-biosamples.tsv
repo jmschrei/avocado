@@ -1,0 +1,401 @@
+Index	Biosample
+J000	KMS-11
+J002	SK-N-SH
+J004	K562
+J006	B cell female adult (27 years) and female adult (43 years)
+J007	neurosphere embryo (15 weeks) originated from ganglionic eminence
+J008	placenta embryo (16 weeks)
+J010	H1-hESC
+J011	IMR-90 nuclear fraction
+J012	ovary female adult (51 year)
+J013	layer of hippocampus female adult (75 years)
+J014	epithelial cell of proximal tubule
+J015	placenta male embryo (16 weeks)
+J019	sigmoid colon female adult (53 years)
+J020	HL-60
+J021	esophagus female adult (30 years)
+J023	fibroblast of lung male adult (45 years)
+J024	liver female adult (25 years)
+J025	ACC112
+J026	stomach female adult (53 years)
+J027	subcutaneous adipose tissue female adult (53 years)
+J028	chorion male embryo (16 weeks)
+J029	chorion female embryo (40 weeks)
+J033	middle frontal area 46 female adult (75 years)
+J035	HT1080 nuclear fraction
+J036	transverse colon female adult (53 years)
+J038	heart left ventricle male adult (34 years)
+J040	HepG2
+J041	GM12878
+J042	subcutaneous abdominal adipose tissue nuclear fraction female adult (49 years)
+J043	fibroblast of breast female adult (17 years)
+J044	GM12878 cytosolic fraction
+J045	myotube
+J046	trophoblast cell originated from H1-hESC
+J047	A549 cytosolic fraction
+J048	spleen female adult (53 years)
+J049	H9
+J050	GM12891
+J051	Loucy
+J053	B cell female adult (27 years)
+J055	NCI-H929
+J056	upper lobe of left lung female adult (53 years)
+J057	muscle of leg female embryo (110 days)
+J059	chorionic villus male embryo (38 weeks)
+J060	stomach male adult (37 years)
+J061	HeLa-S3
+J062	MCF-7
+J063	colonic mucosa female adult (73 years)
+J066	smooth muscle cell originated from H9
+J067	thymus male child (3 years)
+J068	right atrium auricular region female adult (53 years)
+J069	body of pancreas male adult (54 years)
+J071	placental pericyte female newborn and male newborn
+J072	colonic mucosa female adult (56 years)
+J073	adipocyte originated from mesenchymal stem cell
+J074	sigmoid colon male adult (54 years)
+J076	MM.1S
+J077	mammary epithelial cell female
+J078	cerebellum female embryo (19 weeks) and female embryo (37 weeks)
+J082	common myeloid progenitor, CD34-positive female adult (27 years)
+J083	mucosa of rectum female adult (50 years)
+J084	spleen female adult (30 years)
+J085	small intestine female adult (30 years)
+J086	stomach smooth muscle female adult (84 years)
+J090	heart right ventricle male child (3 years)
+J091	gastrocnemius medialis male adult (37 years)
+J092	neural progenitor cell originated from H9
+J095	liver male adult (78 years)
+J096	sigmoid colon male adult (37 years)
+J097	endothelial cell of umbilical vein male newborn
+J098	fibroblast of the aortic adventitia female adult (24 years) and male adult (47 years)
+J099	liver male adult (32 years)
+J101	CD14-positive monocyte female
+J102	mesenchymal stem cell of adipose
+J104	skin of body female embryo (24 weeks) and male embryo (22 weeks)
+J105	gastrocnemius medialis female adult (53 years)
+J107	esophagus muscularis mucosa female adult (53 years)
+J108	keratinocyte nuclear fraction female
+J109	metanephros female embryo (20 weeks) and female embryo (24 weeks)
+J111	thymus female embryo (110 days)
+J112	common myeloid progenitor, CD34-positive male adult (36 years)
+J113	OCI-LY1
+J115	neural cell
+J116	amnion male embryo (16 weeks)
+J118	IMR-90 cytosolic fraction
+J120	heart right ventricle male adult (34 years)
+J122	OCI-LY3
+J123	muscle layer of duodenum male adult (73 years)
+J124	GM23338 male adult (53 years) originated from GM23248
+J125	Karpas-422
+J128	angular gyrus male adult (81 year)
+J129	ovary female adult (53 years)
+J130	subcutaneous adipose tissue male adult (37 years)
+J131	HT-29
+J132	vagina female adult (53 years)
+J135	HepG2 nuclear fraction
+J137	parietal lobe female embryo (24 weeks) and male embryo (22 weeks)
+J138	HCT116
+J139	HEK293T
+J140	SK-N-SH treated with 6 μM all-trans-retinoic acid for 48 hours
+J143	neural stem progenitor cell originated from H9
+J144	Panc1
+J146	heart left ventricle female adult (53 years)
+J147	skeletal muscle myoblast male adult (22 years)
+J148	thyroid gland female adult (51 year)
+J149	ovary female adult (30 years)
+J153	placental basal plate female embryo (40 weeks)
+J156	endothelial cell of umbilical vein nuclear fraction male newborn
+J158	lower leg skin female adult (53 years)
+J159	neural stem progenitor cell originated from H1-hESC
+J160	gastroesophageal sphincter female adult (51 year)
+J161	lung female adult (30 years)
+J162	muscle layer of duodenum male adult (59 years)
+J163	peripheral blood mononuclear cell male adult (39 years)
+J164	H9 genetically modified using stable transfection
+J168	foreskin fibroblast male newborn
+J171	HeLa-S3 nuclear fraction
+J172	tibial nerve female adult (53 years)
+J173	neutrophil
+J175	vagina female adult (51 year)
+J176	CD14-positive monocyte male adult (21 year)
+J177	H1-hESC cytosolic fraction
+J178	heart left ventricle male child (3 years)
+J179	prostate gland male adult (37 years)
+J180	M059J
+J181	CD4-positive, alpha-beta T cell
+J182	mammary epithelial cell female adult (18 years)
+J185	layer of hippocampus male adult (73 years)
+J186	Parathyroid adenoma male adult (62 years)
+J187	sigmoid colon male adult (34 years)
+J188	endocrine pancreas adult (59 years)
+J190	skeletal muscle satellite cell female adult originated from mesodermal cell
+J191	esophagus squamous epithelium female adult (53 years)
+J192	lung male child (3 years)
+J193	melanocyte of skin male child (1 year) and male child (3 years)
+J195	foreskin keratinocyte male newborn
+J196	B cell male adult (37 years)
+J197	PC-3
+J199	bipolar neuron originated from GM23338 treated with 0.5 μg/mL doxycycline hyclate for 4 days
+J200	IMR-90
+J201	Peyer's patch female adult (53 years)
+J202	A549 nuclear fraction
+J208	right cardiac atrium male adult (34 years)
+J209	esophagus muscularis mucosa female adult (51 year)
+J211	brain male embryo (122 days)
+J213	layer of hippocampus male adult (81 year)
+J215	esophagus squamous epithelium male adult (37 years)
+J217	adrenal gland female adult (30 years)
+J218	SJCRH30
+J220	mesenchymal stem cell originated from adipose tissue
+J221	aorta male adult (34 years)
+J222	myoepithelial cell of mammary gland female adult (33 years)
+J223	common myeloid progenitor, CD34-positive
+J225	HUES6
+J226	substantia nigra female adult (75 years)
+J228	kidney male adult (50 years)
+J229	esophagus muscularis mucosa male adult (37 years)
+J230	GM12878 nuclear fraction
+J231	SK-N-DZ cytosolic fraction
+J232	psoas muscle male adult (34 years)
+J233	iPS-18a female adult (48 years)
+J234	uterus female adult (51 year)
+J235	subcutaneous abdominal adipose tissue nuclear fraction female adult (81 year)
+J236	diencephalon female embryo (20 weeks) and male embryo (22 weeks)
+J237	trophoblast female embryo (20 weeks)
+J239	CD8-positive, alpha-beta memory T cell
+J241	testis male adult (37 years)
+J242	hematopoietic multipotent progenitor cell
+J243	mammary epithelial cell female adult (50 years)
+J245	skeletal muscle satellite cell female adult (64 years) and male adult (21 year)
+J246	upper lobe of left lung male adult (54 years)
+J248	breast epithelium female adult (53 years)
+J250	A375
+J252	germinal matrix male embryo (20 weeks)
+J253	osteoblast
+J254	melanocyte of skin female adult (52 years) and male adult (55 years)
+J255	T-helper 17 cell treated with phorbol 13-acetate 12-myristate , ionomycin
+J257	kidney male adult (67 years)
+J258	K562 cytosolic fraction
+J259	body of pancreas male adult (37 years)
+J260	esophagus squamous epithelium male adult (54 years)
+J261	neurosphere female embryo (17 weeks) originated from cortex
+J262	fibroblast of lung female child (11 year) and male adult (45 years)
+J265	OCI-LY7
+J266	endocrine pancreas male adult (46 years)
+J268	small intestine male embryo (108 days)
+J269	mesendoderm originated from H1-hESC
+J270	hepatocyte originated from H9
+J272	HT1080
+J274	DOHH2
+J277	Peyer's patch male adult (54 years)
+J279	ectodermal cell originated from embryonic stem cell
+J280	H1-hESC nuclear fraction
+J283	iPS DF 19.11 male newborn
+J285	keratinocyte female
+J286	tibial nerve female adult (51 year)
+J287	esophagus squamous epithelium female adult (51 year)
+J288	right lobe of liver female adult (53 years)
+J289	omental fat pad male adult (54 years)
+J290	HUES48
+J291	psoas muscle male child (3 years)
+J292	HEK293
+J293	esophagus male adult (34 years)
+J294	neutrophil male
+J295	neurosphere female embryo (17 weeks) originated from ganglionic eminence
+J298	SK-N-SH nuclear fraction
+J300	lung female embryo (120 days)
+J301	GM12892
+J302	SK-N-SH cytosolic fraction
+J304	adrenal gland male adult (34 years)
+J306	PC-9
+J308	tongue female embryo (20 weeks) and female embryo (24 weeks)
+J309	omental fat pad male adult (37 years)
+J310	transverse colon male adult (37 years)
+J313	foreskin melanocyte male newborn
+J314	uterus female adult (53 years)
+J315	brain female embryo (17 weeks)
+J316	thyroid gland female adult (53 years)
+J318	thoracic aorta endothelial cell female adult (22 years) and male adult (55 years)
+J319	astrocyte
+J321	cardiac muscle cell
+J322	A549
+J324	SU-DHL-6
+J326	sigmoid colon male child (3 years)
+J327	adrenal gland female adult (53 years)
+J331	DND-41
+J334	H4
+J336	fibroblast of dermis female adult (44 years) and female adult (55 years)
+J337	stomach female adult (51 year)
+J338	ascending aorta female adult (51 year)
+J339	spleen male adult (37 years)
+J340	gastroesophageal sphincter male adult (54 years)
+J341	endocrine pancreas male adult (45 years)
+J342	frontal cortex female embryo (20 weeks) and male embryo (22 weeks)
+J344	MCF-7 nuclear fraction
+J345	BJ
+J347	placental epithelial cell female newborn and male newborn
+J348	gastroesophageal sphincter female adult (53 years)
+J349	SK-MEL-5 nuclear fraction
+J350	heart left ventricle female adult (51 year)
+J351	pancreas male adult (34 years)
+J352	GM06990
+J355	suprapubic skin female adult (51 year)
+J356	body of pancreas female adult (51 year)
+J358	GM12878 nucleolus fraction
+J359	occipital lobe female embryo (20 weeks) and male embryo (22 weeks)
+J364	omental fat pad female adult (51 year)
+J365	CD8-positive, alpha-beta T cell
+J366	mammary epithelial cell female adult (23 years)
+J367	chorionic villus embryo (16 weeks)
+J368	B cell male adult (21 year)
+J369	stomach male adult (34 years)
+J370	gastrocnemius medialis male adult (54 years)
+J371	SK-N-DZ nuclear fraction
+J372	upper lobe of left lung female adult (51 year)
+J374	T-cell
+J378	kidney epithelial cell
+J379	upper lobe of left lung male adult (37 years)
+J381	subcutaneous preadipocyte female adult (62 years) and male adult (65 years)
+J382	chorionic villus female embryo (40 weeks)
+J385	K562 nucleolus fraction
+J387	tibial nerve male adult (37 years)
+J389	kidney female embryo (120 days)
+J390	spleen male adult (34 years)
+J391	HeLa-S3 cytosolic fraction
+J392	CD8-positive, alpha-beta T cell male adult (21 year)
+J394	iPS DF 6.9 male newborn
+J395	small intestine male adult (34 years)
+J396	placenta female embryo (113 days)
+J400	HepG2 cytosolic fraction
+J401	spleen male adult (54 years)
+J402	prostate gland male adult (54 years)
+J403	substantia nigra male adult (81 year)
+J404	right atrium auricular region female adult (51 year)
+J406	chorionic villus male embryo (16 weeks)
+J411	stomach male adult (54 years)
+J413	NCI-H460 nuclear fraction
+J415	adrenal gland male adult (54 years)
+J418	SK-MEL-5
+J419	gastrocnemius medialis female adult (51 year)
+J421	breast epithelium female adult (51 year)
+J424	A549 treated with 0.02% ethanol for 1 hour
+J428	fibroblast of breast female adult (26 years)
+J430	temporal lobe female embryo (20 weeks) and female embryo (24 weeks)
+J432	GM23248
+J434	placental basal plate male embryo (38 weeks)
+J435	thyroid gland male adult (54 years)
+J439	hair follicle dermal papilla cell female adult (47 years) and female adult (70 years)
+J440	small intestine male child (3 years)
+J442	MCF-7 cytosolic fraction
+J445	suprapubic skin male adult (37 years)
+J446	H7-hESC
+J447	mesenchymal stem cell originated from H1-hESC
+J448	body of pancreas female adult (53 years)
+J449	skeletal muscle tissue female embryo (19 weeks) and male embryo (22 weeks)
+J450	transverse colon female adult (51 year)
+J452	AG04450
+J453	cingulate gyrus female adult (75 years)
+J457	skeletal muscle tissue male adult (54 years)
+J463	muscle layer of colon female adult (56 years)
+J465	cingulate gyrus male adult (81 year)
+J466	gastroesophageal sphincter male adult (37 years)
+J467	mucosa of rectum female adult (61 year)
+J468	liver female child (4 years)
+J469	UCSF-4
+J477	stomach female embryo (96 days)
+J478	mesenchymal stem cell of the bone marrow
+J480	neuron originated from H9
+J481	mesodermal cell originated from HUES64
+J482	endodermal cell originated from HUES64
+J485	CD4-positive, CD25-positive, alpha-beta regulatory T cell
+J486	peripheral blood mononuclear cell male adult (32 years)
+J489	Caco-2
+J491	CD4-positive, alpha-beta memory T cell
+J492	Peyer's patch male adult (37 years)
+J493	common myeloid progenitor, CD34-positive female adult (33 years)
+J495	skeletal muscle tissue female adult (72 years)
+J496	spleen female adult (51 year)
+J499	muscle layer of colon female adult (77 years)
+J502	peripheral blood mononuclear cell female adult (28 years)
+J504	caudate nucleus male adult (81 year)
+J506	fibroblast of dermis
+J508	transverse colon male adult (54 years)
+J510	effector memory CD4-positive, alpha-beta T cell
+J511	HeLa-S3 G1b phase
+J514	mesenchymal stem cell of Wharton's jelly
+J518	myoepithelial cell of mammary gland female adult (36 years)
+J521	NT2/D1
+J530	mucosa of stomach male adult (59 years)
+J531	naive thymus-derived CD4-positive, alpha-beta T cell
+J532	angular gyrus female adult (75 years)
+J533	subcutaneous abdominal adipose tissue nuclear fraction female adult (41 year)
+J534	lower leg skin female adult (51 year)
+J537	adrenal gland female adult (51 year)
+J539	large intestine male embryo (108 days)
+J541	pancreas female adult (30 years)
+J546	testis male adult (54 years)
+J547	aorta female adult (30 years)
+J548	suprapubic skin female adult (53 years)
+J549	subcutaneous abdominal adipose tissue nuclear fraction female adult (59 years)
+J553	thoracic aorta male adult (37 years)
+J555	trophoblast female embryo (40 weeks)
+J558	SK-MEL-5 cytosolic fraction
+J561	lung female embryo (20 weeks) and female embryo (24 weeks)
+J564	thyroid gland female embryo (37 weeks) and female embryo (40 weeks)
+J567	uterus female embryo (24 weeks) and female embryo (28 weeks)
+J569	NCI-H460
+J570	mammary stem cell
+J571	SK-N-MC
+J573	NCI-H460 cytosolic fraction
+J578	thoracic aorta male adult (54 years)
+J579	natural killer cell male adult (21 year)
+J582	iPS-15b female adult (48 years)
+J586	osteoblast female adult (56 years) and male adult (62 years)
+J588	stomach male child (3 years)
+J591	liver male adult (31 year)
+J595	spleen male child (3 years)
+J599	K562 nuclear fraction
+J600	heart female embryo (19 weeks) and female embryo (28 weeks)
+J602	adrenal gland male adult (37 years)
+J603	caudate nucleus female adult (75 years)
+J604	skeletal muscle tissue
+J605	LHCN-M2
+J606	muscle of trunk female embryo (115 days)
+J607	esophagus muscularis mucosa male adult (54 years)
+J608	middle frontal area 46 male adult (81 year)
+J609	thyroid gland male adult (37 years)
+J617	suprapubic skin male adult (54 years)
+J620	vein endothelial cell male adult (48 years) and male adult (52 years)
+J624	subcutaneous adipose tissue female adult (51 year)
+J633	HUES64
+J635	Peyer's patch female adult (51 year)
+J639	SK-N-DZ treated with dimethyl sulfoxide for 72 hours
+J642	endothelial cell of umbilical vein cytosolic fraction male newborn
+J643	A549 treated with 100 nM dexamethasone for 1 hour
+J644	fibroblast of villous mesenchyme female newborn and male newborn
+J667	SJSA1
+J675	RPMI-7951
+J676	common myeloid progenitor, CD34-positive male adult (42 years)
+J678	ascending aorta female adult (53 years)
+J689	keratinocyte cytosolic fraction female
+J697	temporal lobe female adult (75 years)
+J699	A673
+J707	sigmoid colon female adult (51 year)
+J708	spinal cord female embryo (24 weeks) and male embryo (22 weeks)
+J710	A172
+J717	Daoy
+J721	CD4-positive, alpha-beta T cell treated with phorbol 13-acetate 12-myristate , ionomycin
+J724	stomach smooth muscle male adult (59 years)
+J737	tibial artery female adult (53 years)
+J744	skeletal muscle myoblast
+J774	duodenal mucosa male adult (76 years)
+J775	subcutaneous abdominal adipose tissue nuclear fraction female adult (25 years)
+J781	iPS-20b male adult (55 years)
+J797	rectal smooth muscle tissue female adult (50 years)
+J816	duodenal mucosa male adult (59 years)
+J833	temporal lobe male adult (81 year)
+J865	luminal epithelial cell of mammary gland female adult (33 years)
+J896	omental fat pad female adult (53 years)
+J905	Parathyroid adenoma male adult (65 years)
+J911	adrenal gland male embryo (97 days)

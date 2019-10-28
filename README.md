@@ -42,11 +42,19 @@ Imputations can be made in two ways. The first is the command line tool that is 
 
 <i>This is the easiest way to get imputations.</i>
 
-Once you install the Avocado package you will be able to use the command line to make imputations using a pre-trained model. Detailed usage instructions can be found in the README in the `cli` folder. Briefly, you specify the model you'd like to make imputations from (either those from the papers above or from a local directory) and the experiments you'd like to impute and the result will be the corresponding bigwig files. If you use a model from one of the papers above the program will download it from the links above automatically and then use it to make imputations.
+Once you install the Avocado package you will be able to use the command line to make imputations using a pre-trained model. Detailed usage instructions can be found in the README in the `cli` folder. Briefly, the user specifies the model to make imputations from (either those from the papers above or from a local directory) and the experiments to be imputed and the result will be the corresponding bigwig files. If you use a model from one of the papers above the program will download it from the links above automatically and then use it to make imputations.
+
+The following command would make predictions for the transcription factor REST in HepG2 using an Avocado model that has been pre-trained using ENCODE data (the default).
+
+```
+avocado-impute -c J040 -a ChIP-seq_REST_signal_p-value
+```
+
+All cell types and assays that imputations can be made for can be found in the `cli` folder.
 
 ##### Python Interface
 
-Making imputations in Python using a pre-trained model requires only two lines of code; one that loads the model, and one that calls the predict method. We can start by loading up the [pre-trained model](https://noble.gs.washington.edu/proj/avocado/model/) for chromosome 19.
+Making imputations in Python using a pre-trained model requires only two lines of code; one that loads the model, and one that calls the predict method. We can start by loading up the [pre-trained model](https://noble.gs.washington.edu/proj/avocado/model/) from Roadmap for chromosome 19.
 
 ```python
 >>> from avocado import Avocado

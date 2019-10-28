@@ -20,7 +20,6 @@ usage: avocado-impute [-h] [-f FILENAME] [-c CELLTYPE] [-a ASSAY]
                       [-m {roadmap-hg19,encode2018core-hg38,custom}]
                       [-p MODEL_PATH] [-r] [-n NAME] [-v] [-x] [-d DEVICE]
 
-
 Avocado is a deep tensor factorization method for modeling large compendia of
 epigenomic and transcriptomic data sets. Avocado organizes the compedia into a
 three dimensional tensor with the axes being cell types, assays, and the full

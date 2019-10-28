@@ -154,7 +154,8 @@ for chrom in chroms:
 		mode = 'w' if chrom == chroms[0] else 'a'
 
 		with open(".{}.bedgraph".format(name), mode) as outfile:
-			y_hat = model.predict(celltype, assay, verbose=args.verbose)
+			# The -1 below is to account for an ocassional extra bin in the Avocado model
+			y_hat = model.predict(celltype, assay, verbose=args.verbose)[:-1] 
 
 			if args.arcsinh == False:
 				y_hat = numpy.sinh(y_hat)

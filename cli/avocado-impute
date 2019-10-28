@@ -8,6 +8,7 @@ pre-trained Avocado model. There are currently two models supported
 """
 
 import os
+import gc
 import sys
 import numpy
 import argparse
@@ -161,6 +162,9 @@ for chrom in chroms:
 			desc = "{} {} {}".format(celltype, assay, chrom)
 			for i in trange(y_hat.shape[0], desc=desc, disable=not args.verbose):
 				outfile.write("{}\t{}\t{}\t{}\n".format(chrom, i*25, (i+1)*25, y_hat[i]))
+
+	del model
+	gc.collect()
 
 # Run bedgraphToBigWig to convert each bedgraph file to a bigwig
 cmd = "bedGraphToBigWig .{0}.bedgraph {1} {0}.bigwig"

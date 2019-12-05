@@ -12,6 +12,7 @@ import gc
 import sys
 import numpy
 import argparse
+import pyBigWig
 
 from tqdm import trange
 
@@ -141,38 +142,40 @@ if not os.path.isfile(args.chrom_sizes):
 	elif args.model == 'encode2018core-hg38':
 		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes".format(args.model_path))
 
+# Read the size file in
+sizes = []
+with open(args.chrom_sizes, 'r') as infile:
+	for line in infile:
+		chrom, size = line.split()
+		if chrom in chroms:
+			sizes.append((chrom, int(size)))
 
-# Make predictions and write them out to a bedgraph file
+bigwigs = []
+for name in names:
+	bw = pyBigWig.open(name, "w")
+	bw.addHeader(sizes)
+	bigwigs.append(bw)
+
+# Make predictions and write them out to the bigwig file
 for chrom in chroms:
 	if args.verbose:
 		print("Loading model file {}/avocado-{}...".format(args.model_path, chrom))
 
 	model = Avocado.load("{}/avocado-{}".format(args.model_path, chrom))
 
-	for celltype, assay, name in zip(celltypes, assays, names):
-		name = name.replace(".bigwig", "")
-		mode = 'w' if chrom == chroms[0] else 'a'
+	for celltype, assay, bw in zip(celltypes, assays, bigwigs):
+		y_hat = model.predict(celltype, assay, verbose=args.verbose)[:-1] 
+		if args.arcsinh == False:
+			y_hat = numpy.sinh(y_hat)
 
-		with open(".{}.bedgraph".format(name), mode) as outfile:
-			# The -1 below is to account for an ocassional extra bin in the Avocado model
-			y_hat = model.predict(celltype, assay, verbose=args.verbose)[:-1] 
-
-			if args.arcsinh == False:
-				y_hat = numpy.sinh(y_hat)
-
-			desc = "{} {} {}".format(celltype, assay, chrom)
-			for i in trange(y_hat.shape[0], desc=desc, disable=not args.verbose):
-				outfile.write("{}\t{}\t{}\t{}\n".format(chrom, i*25, (i+1)*25, y_hat[i]))
+		bw.addEntries(chrom, 0, values=y_hat, span=25, step=25)
 
 	del model
 	gc.collect()
 
-# Run bedgraphToBigWig to convert each bedgraph file to a bigwig
-cmd = "bedGraphToBigWig .{0}.bedgraph {1} {0}.bigwig"
-for celltype, assay, name in zip(celltypes, assays, names):
+# Close the bigwig files
+for name, bw in zip(names, bigwigs):
 	if args.verbose:
-		print("Converting {} {} from bedgraph to bigwig...".format(celltype, assay))
+		print("Closing {}...".format(bw))
 
-	name = name.replace(".bigwig", "")
-	os.system(cmd.format(name, args.chrom_sizes))
-	os.system("rm .{}.bedgraph".format(name))
+	bw.close()

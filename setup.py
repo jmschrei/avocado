@@ -15,5 +15,6 @@ setup(
         "theano >= 1.0.1",
         "keras >= 2.0.8",
         "tqdm >= 4.24.0"
+        "pyBigWig >= 0.3.17"
     ]
 )

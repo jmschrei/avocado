@@ -148,7 +148,7 @@ with open(args.chrom_sizes, 'r') as infile:
 	for line in infile:
 		chrom, size = line.split()
 		if chrom in chroms:
-			sizes_[chrom] = size
+			sizes_[chrom] = int(size)
 
 	sizes = [(chrom, sizes_[chrom]) for chrom in chroms]
 

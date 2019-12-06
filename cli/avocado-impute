@@ -143,12 +143,15 @@ if not os.path.isfile(args.chrom_sizes):
 		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes".format(args.model_path))
 
 # Read the size file in
-sizes = []
+sizes_ = {}
 with open(args.chrom_sizes, 'r') as infile:
 	for line in infile:
 		chrom, size = line.split()
 		if chrom in chroms:
-			sizes.append((chrom, int(size)))
+			sizes_[chrom] = size
+
+	sizes = [(chrom, sizes_[chrom]) for chrom in chroms]
+
 
 bigwigs = []
 for name in names:

@@ -8,7 +8,7 @@ Avocado is a multi-scale deep tensor factorization method for learning a latent 
 
 This approach has been used in several contexts. If available, the pre-trained models and resulting imputations are below.
 
-1. [Multi-scale deep tensor factorization learns a latent representation of the human epigenome](https://www.biorxiv.org/content/early/2018/07/08/364976) [**[model]**](https://noble.gs.washington.edu/proj/avocado/model/) [**[imputations]**](https://www.encodeproject.org/publication-data/ENCSR617ILB/)  <br>
+1. [**Multi-scale deep tensor factorization learns a latent representation of the human epigenome**](https://www.biorxiv.org/content/early/2018/07/08/364976) [**[model]**](https://noble.gs.washington.edu/proj/avocado/model/) [**[imputations]**](https://www.encodeproject.org/publication-data/ENCSR617ILB/)  <br>
 
 This model was trained on 1,014 tracks of epigenomic data from the Roadmap Epigenomics Mapping Consortium (REMC) that include chromatin accessibility (DNase-seq) and 23 tracks of histone modification (ChIP-seq) from 127 human primary cell lines and tissues. <br>
 

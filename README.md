@@ -8,11 +8,11 @@ Avocado is a multi-scale deep tensor factorization method for learning a latent 
 
 This approach has been used in several contexts. If available, the pre-trained models and resulting imputations are below.
 
-1. [Multi-scale deep tensor factorization learns a latent representation of the human epigenome](https://www.biorxiv.org/content/early/2018/07/08/364976) [**[model]**](https://noble.gs.washington.edu/proj/avocado/model/) [**[imputations]**](https://noble.gs.washington.edu/proj/avocado/data/avocado_full/)  <br>
+1. [Multi-scale deep tensor factorization learns a latent representation of the human epigenome](https://www.biorxiv.org/content/early/2018/07/08/364976) [**[model]**](https://noble.gs.washington.edu/proj/avocado/model/) [**[imputations]**](https://www.encodeproject.org/publication-data/ENCSR617ILB/)  <br>
 
 This model was trained on 1,014 tracks of epigenomic data from the Roadmap Epigenomics Mapping Consortium (REMC) that include chromatin accessibility (DNase-seq) and 23 tracks of histone modification (ChIP-seq) from 127 human primary cell lines and tissues. <br>
 
-2. [**Completing the ENCODE3 compendium yields accurate imputations across a variety of assays and human biosamples**](https://www.biorxiv.org/content/10.1101/533273v1) [**[model]**](https://noble.gs.washington.edu/proj/mango/models/) **[imputations tbd]**
+2. [**Completing the ENCODE3 compendium yields accurate imputations across a variety of assays and human biosamples**](https://www.biorxiv.org/content/10.1101/533273v1) [**[model]**](https://noble.gs.washington.edu/proj/mango/models/) [**[imputations]**](https://www.encodeproject.org/publication-data/ENCSR481OSA/)
 
 This model was trained on 3,814 tracks of epigenomic data from the ENCODE Compendium that include chromatin accessibility (DNase-seq and ATAC-seq), measurements of gene transcription (including CAGE, RAMPAGE, polyA-depleted, etc.), histone modifications, and DNA-binding proteins such as transcription factors. 
 

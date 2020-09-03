@@ -175,7 +175,7 @@ for chrom in chroms:
 			raise Warning("Model file for chromosome {} not found. " \
 				"Skipping.".format(chrom))
 			continue
-		except:
+		else:
 			raise IOError("Model file for chromosome {} not found.".format(chrom))
 
 

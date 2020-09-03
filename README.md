@@ -28,7 +28,7 @@ Avocado can be installed using pip.
 pip install avocado-epigenome
 ```
 
-#### Imputing epigenomic data
+### Imputing epigenomic data
 
 Avocado can impute genome-wide epigenomic and transcriptomic experiments that have not yet been performed, allowing for the computational characterization of human epigenomics on a massive scale. These imputations are of -log10 p-values at 25 bp resolution that have been arcsinh transformed to stablize the variance and are generally high quality when compared with competing methods. Below is an example of the imputation of H3K4me3 in IMR90 from ChromImpute, PREDICTD, and Avocado as well as the MSE of the imputations in the displayed region. The experimental signal is shown in faded blue in each panel to compare to the imputations.
 
@@ -84,19 +84,21 @@ array([ 0.11702165,  0.12218987,  0.12052223, ..., -0.06277314,
 
 Note that because the genome is so long the genome factors cannot fit entirely in memory. Accordingly, we have split the model into one file per chromosome, where the neural network parameters, cell type embedding, and assay embedding are shared from one chromosome to the next. In order to make imputations genome-wide, one would need to load up and then make imputations for each chromosome separately.
 
-#### Using the learned latent representation
+### Using the learned latent representation
 
 <p align="center">
 	<img src="figures/avocado-embeddings.png" width="900"/>
 </p>
 
-During the training process, Avocado learns a low-dimensional latent representation of each axis of the tensor: the cell types, the assays, and the genomic positions. Each axis is independent of the other two; for example, the representations of genomic positions is based on data from all available assays in all cell types. Thus, the learned genome representation is cell type agnostic. 
+During the training process, Avocado learns a low-dimensional latent representation of each axis of the tensor: the cell types, the assays, and the genomic positions. Each axis is independent of the other two; for example, the representations of genomic positions is based on data from all available assays in all cell types. Thus, the learned genome representation is a distillation of information across all cell types and assays. 
 
 Projections of the learned genomic position, cell type, and assay representations are shown above for the model trained using Roadmap data. In each panel, a point corresponds to either a single genomic locus, assay, or cell type. 
 
-All three embeddings can be extracted from the commands using the following simple commands:
+All three embeddings can be extracted from the commands using the following simple commands to first load a model and then extract the relevant embedding:
 
 ```python
+>>> from avocado import Avocado
+>>> model = Avocado.load("avocado-chr1")
 >>> genome_embedding = model.genome_embedding
 >>> celltype_embedding = model.celltype_embedding
 >>> assay_embedding = model.assay_embedding
@@ -104,7 +106,7 @@ All three embeddings can be extracted from the commands using the following simp
 
 The cell type and assay embeddings will return simply the learned embeddings from the model. The genome embedding will consist of the 25 bp, the 250 bp, and the 5 kbp factors concatenated together at 25 bp resolution such that 10 positions in a row share the same values for the 250 bp factors and 200 positions in a row share the same 5 kbp factor values.
 
-#### Training a new model
+### Training a new model
 
 Using Avocado is easy! We can initialize the model just by passing in a list of cell types, a list of assays, and specifying the various hyperparameters. The defaults for all of the hyperparameters are those that were used in the manuscript. Here is an example of creating a very small model that could potentially be trained on a CPU.
 
@@ -149,7 +151,7 @@ There are currently two tutorials in the form of Jupyter notebooks. One focuses 
 	<img src="figures/Avocado-Training.gif" width="850"/>
 </p>
 
-#### Can I add my own cell type and assay to your model?
+### Can I add my own cell type and assay to your model?
 
 Yes! The model is flexible enough to allow one to easily add in new cell types or assays without needing to retrain all of the parameters. The procedure is essentially to freeze the latent factors on the genome axis, the neural network parameters, and the latent factors in the assay embedding if you're adding in a new cell type or in the cell type embedding if you're adding in a new assay. Then, one can learn the latent factors corresponding either to the cell types or assays to be added in. This works because the frozen neural network parameters ensure that the new embedding is comparable to the old one. In fact, this is how we learn genomic representations that are comparable from one chromosome to another despite training the representations independently.
 

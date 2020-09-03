@@ -67,6 +67,10 @@ parser.add_argument('-x', '--include_x', action='store_true', default=False,
 parser.add_argument('-d', '--device', type=str, default='cuda',
 	help="A flag that is passed to THEANO_FLAGS indicating what device " \
 		"to run the imputation on. Default is 'cuda'.")
+parser.add_argument('-k', '--skip_missing', action='store_true', default=False,
+	help="Whether to skip chromosomes with missing Avocado model files. " \
+		"This can be useful when making predictions in only a portion of the " \
+		"genome. Default is to raise an error.")
 
 # Pull the arguments.
 args = parser.parse_args()
@@ -76,39 +80,20 @@ os.environ['THEANO_FLAGS'] = "device={}".format(args.device)
 from avocado import Avocado
 
 # Fix the inputs to be consistent.
+models = 'roadmap-hg19', 'encode2018core-hg38', 'encode2018full-hg38', 'entex2019-hg38', 'encode2019mouse-mm10'
+
 if args.name is None:
 	args.name = '{}.{}.bigwig'.format(args.celltype, args.assay)
 
 if args.chrom_sizes is None:	
-	if args.model == 'roadmap-hg19':
+	if args.model in models:
+		model, assembly = args.model.split("-")
 		if args.model_path == 'None':
-			args.model_path = '.roadmap-model/'
-		args.chrom_sizes = args.model_path + '/hg19.chrom.sizes'
-		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/models/roadmap/avocado-{}'
-	elif args.model == 'encode2018core-hg38':
-		if args.model_path == 'None':
-			args.model_path = '.encode2018core-model/'
-		args.chrom_sizes = args.model_path + '/hg38.chrom.sizes'
-		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/models/encode2018core/avocado-{}'
-		args.include_x = True
-	elif args.model == 'encode2018full-hg38':
-		if args.model_path == 'None':
-			args.model_path = '.encode2018full-model/'
-		args.chrom_sizes = args.model_path + '/hg38.chrom.sizes'
-		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/models/encode2018full/avocado-{}'
-		args.include_x = True
-	elif args.model == 'entex2019-hg38':
-		if args.model_path == 'None':
-			args.model_path = '.entex2019-model/'
-		args.chrom_sizes = args.model_path + '/hg38.chrom.sizes'
-		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/models/entex2019/avocado-{}'
-		args.include_x = True
-	elif args.model == 'encode2019mouse-mm10':
-		if args.model_path == 'None':
-			args.model_path = '.encode2019mouse-model/'
-		args.chrom_sizes = args.model_path + '/mm10.chrom.sizes'
-		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/models/encode2019mouse/avocado-{}'
-		args.include_x = True
+			args.model_path = '.{}-model/'.format(model)
+		args.chrom_sizes = args.model_path + '/{}.chrom.sizes'.format(assembly)
+		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/models/{}'.format(model)
+		args.download_path = args.download_path + '/avocado-{}'
+		args.include_x = False if args.model == 'roadmap-hg19' else True
 
 
 # If the user has passed in a file of experiments to impute...
@@ -157,16 +142,9 @@ for chrom in chroms:
 # Download the chromosome size file if not already downloaded
 if not os.path.isfile(args.chrom_sizes):
 	print("Warning: chromosome size file not found. Downloading...")
-	if args.model == 'roadmap-hg19':
-		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes".format(args.model_path))
-	elif args.model == 'encode2018core-hg38':
-		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes".format(args.model_path))
-	elif args.model == 'encode2018full-hg38':
-		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes".format(args.model_path))
-	elif args.model == 'entex2019-hg38':
-		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes".format(args.model_path))
-	elif args.model == 'encode2019mouse-mm10':
-		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.chrom.sizes".format(args.model_path))
+	if args.model in models:
+		model, assembly = args.model.split("-")
+		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/{}/bigZips/{}.chrom.sizes".format(args.model_path, assembly, assembly))
 
 # Read the size file in
 sizes_ = {}
@@ -190,7 +168,16 @@ for chrom in chroms:
 	if args.verbose:
 		print("Loading model file {}/avocado-{}...".format(args.model_path, chrom))
 
-	model = Avocado.load("{}/avocado-{}".format(args.model_path, chrom))
+	try:
+		model = Avocado.load("{}/avocado-{}".format(args.model_path, chrom))
+	except:
+		if model.skip_missing == True:
+			raise Warning("Model file for chromosome {} not found. " \
+				"Skipping.".format(chrom))
+			continue
+		except:
+			raise IOError("Model file for chromosome {} not found.".format(chrom))
+
 
 	for celltype, assay, bw in zip(celltypes, assays, bigwigs):
 		y_hat = model.predict(celltype, assay, verbose=args.verbose)[:-1] 

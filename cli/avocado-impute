@@ -172,7 +172,7 @@ for chrom in chroms:
 		model = Avocado.load("{}/avocado-{}".format(args.model_path, chrom))
 	except FileNotFoundError:
 		if args.skip_missing == True:
-			raise Warning("Model file for chromosome {} not found. Skipping.".format(chrom))
+			print("Warning: Model file for chromosome {} not found. Skipping.".format(chrom))
 			continue
 		else:
 			raise IOError("Model file for chromosome {} not found.".format(chrom))

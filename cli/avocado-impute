@@ -83,13 +83,26 @@ if args.chrom_sizes is None:
 		if args.model_path == 'None':
 			args.model_path = '.roadmap-model/'
 		args.chrom_sizes = args.model_path + '/hg19.chrom.sizes'
-		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/model/avocado-{}'
+		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/models/roadmap/avocado-{}'
 	elif args.model == 'encode2018core-hg38':
 		if args.model_path == 'None':
 			args.model_path = '.encode2018core-model/'
 		args.chrom_sizes = args.model_path + '/hg38.chrom.sizes'
-		args.download_path = 'https://noble.gs.washington.edu/proj/mango/models/avocado-{}'
+		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/models/encode2018core/avocado-{}'
 		args.include_x = True
+	elif args.model == 'encode2018full-hg38':
+		if args.model_path == 'None':
+			args.model_path = '.encode2018full-model/'
+		args.chrom_sizes = args.model_path + '/hg38.chrom.sizes'
+		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/models/encode2018full/avocado-{}'
+		args.include_x = True
+	elif args.model == 'encode2019mouse-mm10':
+		if args.model_path == 'None':
+			args.model_path = '.encode2019mouse-model/'
+		args.chrom_sizes = args.model_path + '/mm10.chrom.sizes'
+		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/models/encode2019mouse/avocado-{}'
+		args.include_x = True
+
 
 # If the user has passed in a file of experiments to impute...
 if args.filename is not None:
@@ -141,6 +154,10 @@ if not os.path.isfile(args.chrom_sizes):
 		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes".format(args.model_path))
 	elif args.model == 'encode2018core-hg38':
 		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes".format(args.model_path))
+	elif args.model == 'encode2018full-hg38':
+		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes".format(args.model_path))
+	elif args.model == 'encode2019mouse-mm10':
+		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.chrom.sizes".format(args.model_path))
 
 # Read the size file in
 sizes_ = {}

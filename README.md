@@ -8,15 +8,15 @@ Avocado is a multi-scale deep tensor factorization method for learning a latent 
 
 This approach has been used in several contexts. If available, the pre-trained models and resulting imputations are below.
 
-1. [**Multi-scale deep tensor factorization learns a latent representation of the human epigenome**](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-020-01977-6) [**[model]**](https://noble.gs.washington.edu/proj/avocado/model/) [**[imputations]**](https://www.encodeproject.org/publication-data/ENCSR617ILB/)  <br>
+1. [**Multi-scale deep tensor factorization learns a latent representation of the human epigenome**](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-020-01977-6) [**[model]**](https://noble.gs.washington.edu/proj/avocado/models/roadmap/) [**[imputations]**](https://www.encodeproject.org/publication-data/ENCSR617ILB/)  <br>
 
 This model was trained on 1,014 tracks of epigenomic data from the Roadmap Epigenomics Mapping Consortium (REMC) that include chromatin accessibility (DNase-seq) and 23 tracks of histone modification (ChIP-seq) from 127 human primary cell lines and tissues. <br>
 
-2. [**Completing the ENCODE3 compendium yields accurate imputations across a variety of assays and human biosamples**](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-020-01978-5) [**[model]**](https://noble.gs.washington.edu/proj/mango/models/) [**[imputations]**](https://www.encodeproject.org/publication-data/ENCSR481OSA/)
+2. [**Completing the ENCODE3 compendium yields accurate imputations across a variety of assays and human biosamples**](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-020-01978-5) [**[ENCODE2018Core Model]**](https://noble.gs.washington.edu/proj/avocado/models/encode2018core/) [**[ENCODE2018Full Model]**](https://noble.gs.washington.edu/proj/avocado/models/encode2018full/) [**[imputations]**](https://www.encodeproject.org/publication-data/ENCSR481OSA/)
 
 This model was trained on 3,814 tracks of epigenomic data from the ENCODE Compendium that include chromatin accessibility (DNase-seq and ATAC-seq), measurements of gene transcription (including CAGE, RAMPAGE, polyA-depleted, etc.), histone modifications, and DNA-binding proteins such as transcription factors. 
 
-3. [**Zero-shot imputations across species are enabled through joint modeling of human and mouse epigenomics**](https://www.biorxiv.org/content/10.1101/801183v1) **[model tbd]** **[imputations tbd]**
+3. [**Zero-shot imputations across species are enabled through joint modeling of human and mouse epigenomics**](https://www.biorxiv.org/content/10.1101/801183v1) [**[model]**](https://noble.gs.washington.edu/proj/avocado/models/encode2019mouse/) **[imputations tbd]**
 
 This model was trained using 1,145 tracks of epigenomic data from mice and 6,870 tracks of epigenomic data from the ENCODE Compendium (see 2). The model is designed to make imputations in mice by leveraging the large amount of high quality human epigenomic data that has already been collected.
 

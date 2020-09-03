@@ -96,6 +96,12 @@ if args.chrom_sizes is None:
 		args.chrom_sizes = args.model_path + '/hg38.chrom.sizes'
 		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/models/encode2018full/avocado-{}'
 		args.include_x = True
+	elif args.model == 'entex2019-hg38':
+		if args.model_path == 'None':
+			args.model_path = '.entex2019-model/'
+		args.chrom_sizes = args.model_path + '/hg38.chrom.sizes'
+		args.download_path = 'https://noble.gs.washington.edu/proj/avocado/models/entex2019/avocado-{}'
+		args.include_x = True
 	elif args.model == 'encode2019mouse-mm10':
 		if args.model_path == 'None':
 			args.model_path = '.encode2019mouse-model/'
@@ -155,6 +161,8 @@ if not os.path.isfile(args.chrom_sizes):
 	elif args.model == 'encode2018core-hg38':
 		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes".format(args.model_path))
 	elif args.model == 'encode2018full-hg38':
+		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes".format(args.model_path))
+	elif args.model == 'entex2019-hg38':
 		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes".format(args.model_path))
 	elif args.model == 'encode2019mouse-mm10':
 		os.system("wget -P {} http://hgdownload.cse.ucsc.edu/goldenPath/mm10/bigZips/mm10.chrom.sizes".format(args.model_path))

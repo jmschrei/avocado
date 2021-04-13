@@ -464,12 +464,12 @@ class Avocado(object):
 				X_valid, self.n_genomic_positions, self.batch_size)
 
 			history = self.model.fit_generator(X_train_gen, epoch_size, n_epochs, 
-				workers=1, pickle_safe=True, validation_data=X_valid_gen, 
+				workers=1,  validation_data=X_valid_gen, 
 				validation_steps=30, verbose=verbose, callbacks=callbacks, 
 				**kwargs)
 		else:
 			history = self.model.fit_generator(X_train_gen, epoch_size, n_epochs, 
-				workers=1, pickle_safe=True, verbose=verbose, 
+				workers=1,  verbose=verbose, 
 				callbacks=callbacks, **kwargs)
 
 		self.experiments = list(X_train.keys())
@@ -611,12 +611,12 @@ class Avocado(object):
 				X_valid, self.n_genomic_positions, self.batch_size)
 
 			history = model.fit_generator(X_train_gen, epoch_size, n_epochs, 
-				workers=1, pickle_safe=True, validation_data=X_valid_gen, 
+				workers=1,  validation_data=X_valid_gen, 
 				validation_steps=30, verbose=verbose, callbacks=callbacks, 
 				**kwargs)
 		else:
 			history = model.fit_generator(X_train_gen, epoch_size, n_epochs, 
-				workers=1, pickle_safe=True, verbose=verbose, 
+				workers=1,  verbose=verbose, 
 				callbacks=callbacks, **kwargs)
 
 		for layer in self.model.layers:
@@ -800,12 +800,12 @@ class Avocado(object):
 				X_valid, self.n_genomic_positions, self.batch_size)
 
 			history = model.fit_generator(X_train_gen, epoch_size, n_epochs, 
-				workers=1, pickle_safe=True, validation_data=X_valid_gen, 
+				workers=1,  validation_data=X_valid_gen, 
 				validation_steps=30, verbose=verbose, callbacks=callbacks, 
 				**kwargs)
 		else:
 			history = model.fit_generator(X_train_gen, epoch_size, n_epochs, 
-				workers=1, pickle_safe=True, verbose=verbose, 
+				workers=1,  verbose=verbose, 
 				callbacks=callbacks, **kwargs)
 
 		for layer in self.model.layers:

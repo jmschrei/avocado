@@ -160,8 +160,8 @@ Programmatically there is a built-in function that allows you to pass in data fo
 ```python
 >>> data = {}
 >>> for assay in assays:
->>>	filename = 'data/E004.{}.pilot.arcsinh.npz'.format(celltype, assay)
->>>	data[('E004', assay)] = numpy.load(filename)['arr_0']
+>>>	filename = 'data/{}.{}.pilot.arcsinh.npz'.format(celltype, assay)
+>>>	data[(celltype, assay)] = numpy.load(filename)['arr_0']
 >>>
 >>> model.fit_celltypes(data, n_epochs=5)
 ```

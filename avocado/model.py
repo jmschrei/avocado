@@ -1,4 +1,4 @@
-# models.py
+# model.py
 # Contact: Jacob Schreiber <jmschr@cs.washington.edu>
 #          William Noble   <wnoble@uw.edu>
 
@@ -27,7 +27,85 @@ def build_model(n_celltypes, n_celltype_factors, n_assays, n_assay_factors,
 	n_layers, n_nodes, freeze_celltypes=False, freeze_assays=False,
 	freeze_genome_25bp=False, freeze_genome_250bp=False, 
 	freeze_genome_5kbp=False, freeze_network=False):
-	"""This function builds a multi-scale deep tensor factorization model."""
+	"""Build and compile the Keras model behind an Avocado object.
+
+	The model has five integer inputs: the cell type, the assay, and the
+	genomic position at 25 bp, 250 bp and 5 kbp resolution. Each input is
+	looked up in its own embedding layer, the five embeddings are concatenated,
+	and the result passes through `n_layers` dense layers of `n_nodes` ReLU
+	units and a final linear unit that predicts the signal value. The model is
+	compiled with the Adam optimizer and the mean squared error loss.
+
+	The 25 bp embedding has `n_genomic_positions` rows, the 250 bp embedding
+	has `int(n_genomic_positions / 10) + 1` rows and the 5 kbp embedding has
+	`int(n_genomic_positions / 200) + 1` rows. The data generators and
+	`Avocado.predict` index the coarser embeddings with the 25 bp index
+	divided by 10 and by 200.
+
+	Each `freeze_*` argument sets `trainable = False` on its layers before the
+	model is compiled, so `fit` does not update those weights.
+	`Avocado.fit_celltypes` and `Avocado.fit_assays` use them to train one
+	embedding while holding the rest of the model fixed.
+
+	Parameters
+	----------
+	n_celltypes : int
+		The number of cell types, which is the number of rows in the cell type
+		embedding.
+
+	n_celltype_factors : int
+		The number of factors used to represent each cell type.
+
+	n_assays : int
+		The number of assays, which is the number of rows in the assay
+		embedding.
+
+	n_assay_factors : int
+		The number of factors used to represent each assay.
+
+	n_genomic_positions : int
+		The number of 25 bp genomic bins, which is the number of rows in the
+		25 bp genome embedding.
+
+	n_25bp_factors : int
+		The number of factors used to represent each 25 bp bin.
+
+	n_250bp_factors : int
+		The number of factors used to represent each 250 bp bin.
+
+	n_5kbp_factors : int
+		The number of factors used to represent each 5 kbp bin.
+
+	n_layers : int
+		The number of hidden dense layers.
+
+	n_nodes : int
+		The number of ReLU units in each hidden dense layer.
+
+	freeze_celltypes : bool, optional
+		Whether to freeze the cell type embedding. Default is False.
+
+	freeze_assays : bool, optional
+		Whether to freeze the assay embedding. Default is False.
+
+	freeze_genome_25bp : bool, optional
+		Whether to freeze the 25 bp genome embedding. Default is False.
+
+	freeze_genome_250bp : bool, optional
+		Whether to freeze the 250 bp genome embedding. Default is False.
+
+	freeze_genome_5kbp : bool, optional
+		Whether to freeze the 5 kbp genome embedding. Default is False.
+
+	freeze_network : bool, optional
+		Whether to freeze the dense layers, including the output layer.
+		Default is False.
+
+	Returns
+	-------
+	model : keras.models.Model
+		The compiled Keras model.
+	"""
 
 	celltype_input = Input(shape=(1,), name="celltype_input")
 	celltype_embedding = Embedding(n_celltypes, n_celltype_factors, 
@@ -137,7 +215,8 @@ class Avocado(object):
 		The number of nodes per layer. Default is 2048.
 
 	batch_size : int, optional
-		The size of each batch to use in training. Defaut is 40000.
+		The number of examples in each batch, used both in training and in
+		`predict`. Default is 40000.
 
 	freeze_celltypes : bool, optional
 		Whether to freeze the training of the cell type embedding. Default
@@ -285,8 +364,12 @@ class Avocado(object):
 		genomic factors, such that the first columns correspond to the
 		25 bp factors, the next columns correspond to the 250 bp factors,
 		and the final columns correspond to the 5 kbp factors. The factors
-		that span more than 25 bp will be repeated across several successive
-		positions 
+		that span more than 25 bp are repeated across successive positions:
+		row i holds row i // 10 of the 250 bp embedding and row i // 200 of
+		the 5 kbp embedding.
+
+		The array is float64 with one row per 25 bp bin, so for a whole
+		chromosome it can take several gigabytes of memory.
 
 		Parameters
 		----------
@@ -342,23 +425,32 @@ class Avocado(object):
 		form of a numpy array. The tracks can either be in the form of an array
 		that is in memory or as a memory map.
 
+		Each call continues training from the current weights. Training runs
+		through Keras' `fit_generator` with `epoch_size` steps per epoch, and
+		after training `self.experiments` is replaced by the keys of
+		`X_train`.
+
 		Parameters
 		----------
 		X_train : dict
 			A dictionary of training data values, where the keys are a tuple of
-			(celltype, assay) and the values are a track.
+			(celltype, assay) and the values are a track. Every cell type and
+			assay must be in the model and every track must have
+			`n_genomic_positions` entries, or a ValueError is raised.
 
 		X_valid : dict or None, optional
 			A dictionary of validation data values that are used to calculate
-			validation set MSE during the training process. If None, validation
-			set statistics are not calculated during the training process.
-			Default is None.
+			validation set MSE during the training process, from 30 batches at
+			the end of each epoch. If None, validation set statistics are not
+			calculated during the training process. On Python 3, passing a
+			dictionary raises a TypeError at the end of the first epoch; see
+			`avocado.io.data_generator`. Default is None.
 
 		n_epochs : int, optional
-			The number of epochs to train on before ending training. Default is 120.
+			The number of epochs to train on before ending training. Default is 200.
 
 		epoch_size : int, optional
-			The number of batches per epoch. Default is 200.
+			The number of batches per epoch. Default is 120.
 
 		verbose: int, optional
 			The verbosity level of training. Must be one of 0, 1, or 2, where 0
@@ -378,15 +470,16 @@ class Avocado(object):
 					of the genome indexes, such that each epoch sees every
 					genomic index once, but each batch sees nearly random 
 					indexes
-				'random' : Randomly selects genomic positions. No guarantee
-					on the number of times each position has been seen. 
+				'random' : Uses the same generator as 'permuted'.
 
-			Default is 'sequential'.
+			Any other value raises an UnboundLocalError. Ignored when
+			`input_generator` is given. Default is 'sequential'.
 
 		input_generator : generator or None, optional
 			A custom data generator object to be used in the place of the
-			default generator. This will only change the training generator,
-			not the validation generator. Default is None.
+			default generator. It must yield the same (X, y) batches as the
+			generators in `avocado.io`. This will only change the training
+			generator, not the validation generator. Default is None.
 
 		**kwargs : optional
 			Any other keyword arguments to be passed into the `fit_generator`
@@ -394,9 +487,9 @@ class Avocado(object):
 
 		Returns
 		-------
-		history : keras.History.history
+		history : keras.callbacks.History
 			The keras history object that records training loss values and
-			metric values.
+			metric values in its `history` attribute.
 		"""
 
 		if not isinstance(X_train, dict):
@@ -481,9 +574,15 @@ class Avocado(object):
 
 		This method will add a new cell type to the cell type embedding after
 		freezing all of the other parameters in the model, including weights
-		and the other cell type positions. Functionally it will train a new
-		cell type embedding and return a new model whose cell type embedding
-		is the concatenation of the old cell type embedding and the new one.
+		and the other cell type positions. It builds a temporary model whose
+		cell type embedding holds only the new cell types, copies every other
+		layer from this model and freezes it, and trains the new embedding
+		using the sequential generator. It then replaces `self.model` with a
+		newly built and compiled model whose cell type embedding is the old
+		embedding with the new rows appended, and appends the new cell types
+		to `self.celltypes` in sorted order. Because the replacement model is
+		newly compiled, the optimizer state from earlier calls to `fit` is not
+		kept.
 
 		Pass in a dictionary of training data and an optional dictionary of
 		validation data. The keys to this dictionary are a tuple of the format
@@ -492,6 +591,11 @@ class Avocado(object):
 		that is in memory or as a memory map. The celltypes provided should not
 		appear in the model.celltypes attribute but the assays should exclusively
 		appear in the model.assays attribute.
+
+		`self.experiments` is not updated with the new experiments: the
+		combined list is assigned to the `experiments` attribute of the new
+		Keras model instead, so `save` writes the experiments from before this
+		call.
 
 		Parameters
 		----------
@@ -502,19 +606,20 @@ class Avocado(object):
 		X_valid : dict or None, optional
 			A dictionary of validation data values that are used to calculate
 			validation set MSE during the training process. If None, validation
-			set statistics are not calculated during the training process.
-			Default is None.
+			set statistics are not calculated during the training process. On
+			Python 3, passing a dictionary raises a TypeError at the end of the
+			first epoch; see `avocado.io.data_generator`. Default is None.
 
 		n_epochs : int, optional
-			The number of epochs to train on before ending training. Default is 120.
+			The number of epochs to train on before ending training. Default is 200.
 
 		epoch_size : int, optional
-			The number of batches per epoch. Default is 200.
+			The number of batches per epoch. Default is 120.
 
 		verbose: int, optional
 			The verbosity level of training. Must be one of 0, 1, or 2, where 0
 			means silent, 1 means progress bar, and 2 means use only one line
-			per epoch.
+			per epoch. Default is 1.
 
 		callbacks : list or None, optional
 			A list of keras callback instances to be called during training. 
@@ -525,9 +630,9 @@ class Avocado(object):
 
 		Returns
 		-------
-		history : keras.History.history
-			The keras history object that records training loss values and
-			metric values.
+		history : keras.callbacks.History
+			The keras history object of the temporary model, which records
+			training loss values and metric values in its `history` attribute.
 		"""
 
 		if not isinstance(X_train, dict):
@@ -670,9 +775,14 @@ class Avocado(object):
 
 		This method will add a new assay to the assay embedding after
 		freezing all of the other parameters in the model, including weights
-		and the other assay positions. Functionally it will train a new
-		assay embedding and return a new model whose assay embedding
-		is the concatenation of the old assay embedding and the new one.
+		and the other assay positions. It builds a temporary model whose
+		assay embedding holds only the new assays, copies every other layer
+		from this model and freezes it, and trains the new embedding using
+		the sequential generator. It then replaces `self.model` with a newly
+		built and compiled model whose assay embedding is the old embedding
+		with the new rows appended, and appends the new assays to
+		`self.assays` in sorted order. Because the replacement model is newly
+		compiled, the optimizer state from earlier calls to `fit` is not kept.
 
 		Pass in a dictionary of training data and an optional dictionary of
 		validation data. The keys to this dictionary are a tuple of the format
@@ -681,6 +791,11 @@ class Avocado(object):
 		that is in memory or as a memory map. The assays provided should not
 		appear in the model.assays attribute, but the cell types should appear
 		in the model.celltypes attribute.
+
+		`self.experiments` is not updated with the new experiments: the
+		combined list is assigned to the `experiments` attribute of the new
+		Keras model instead, so `save` writes the experiments from before this
+		call.
 
 		Parameters
 		----------
@@ -691,19 +806,20 @@ class Avocado(object):
 		X_valid : dict or None, optional
 			A dictionary of validation data values that are used to calculate
 			validation set MSE during the training process. If None, validation
-			set statistics are not calculated during the training process.
-			Default is None.
+			set statistics are not calculated during the training process. On
+			Python 3, passing a dictionary raises a TypeError at the end of the
+			first epoch; see `avocado.io.data_generator`. Default is None.
 
 		n_epochs : int, optional
-			The number of epochs to train on before ending training. Default is 120.
+			The number of epochs to train on before ending training. Default is 200.
 
 		epoch_size : int, optional
-			The number of batches per epoch. Default is 200.
+			The number of batches per epoch. Default is 120.
 
 		verbose: int, optional
 			The verbosity level of training. Must be one of 0, 1, or 2, where 0
 			means silent, 1 means progress bar, and 2 means use only one line
-			per epoch.
+			per epoch. Default is 1.
 
 		callbacks : list or None, optional
 			A list of keras callback instances to be called during training. 
@@ -714,9 +830,9 @@ class Avocado(object):
 
 		Returns
 		-------
-		history : keras.History.history
-			The keras history object that records training loss values and
-			metric values.
+		history : keras.callbacks.History
+			The keras history object of the temporary model, which records
+			training loss values and metric values in its `history` attribute.
 		"""
 
 		if not isinstance(X_train, dict):
@@ -864,12 +980,11 @@ class Avocado(object):
 		----------
 		celltype : str
 			The cell type (aka biosample) to be imputed. Must be one of the
-			elements from the list of cell types passed in upon model
-			initialization.
+			elements of `self.celltypes`, or `list.index` raises a ValueError.
 
 		assay : str
-			The assay to be imputed. Must be one of the elements from the list
-			of assays passed in upon model initialization.
+			The assay to be imputed. Must be one of the elements of
+			`self.assays`, or `list.index` raises a ValueError.
 
 		start : int, optional
 			The start position to begin the imputation at. By default this is 0,
@@ -885,9 +1000,11 @@ class Avocado(object):
 
 		Returns
 		-------
-		track : numpy.ndarray
+		track : numpy.ndarray, shape=(end - start,)
 			A track of epigenomic signal value predictions for the specified
-			cell type and assay for the considered genomic positions.
+			cell type and assay for the considered genomic positions, in the
+			space the model was trained in. The pre-trained models were trained
+			on arcsinh-transformed -log10 p-values, which `numpy.sinh` undoes.
 		"""
 
 		if end is not None and end <= start:
@@ -921,6 +1038,14 @@ class Avocado(object):
 		return track
 
 	def get_params(self):
+		"""Meant to collect the first weight matrix of every layer.
+
+		This method does not work. It refers to the undefined names `model`
+		and `layers`, so every call raises a NameError, and it has no return
+		statement. Use `self.model.get_weights()` or the embedding properties
+		instead.
+		"""
+
 		params = []
 		for layer in model.layers:
 			params.append(layers.get_weghts()[0])
@@ -931,18 +1056,25 @@ class Avocado(object):
 		This function produces two files. The first is a json file that has the
 		model hyperparameters associated with it. The second is a h5 file that
 		contains the architecture of the neural network model, the weights, and
-		the optimizer.
+		the optimizer. The json file holds the cell types, assays, experiments,
+		factor counts, layer sizes and batch size, but not the `freeze_*`
+		settings, which are kept only as the trainable flags of the layers in
+		the h5 file.
 
 		Parameters
 		----------
 		name : str, optional
-			The name to use for the json and the h5 file that are stored.
+			The path prefix to use for the json and the h5 file that are
+			stored, which are written to `{name}.json` and `{name}.h5`.
+			Default is 'avocado'.
 
 		separators : tuple, optional
-			The separators to use in the resulting JSON object.
+			The separators to use in the resulting JSON object. Default is
+			(',', ' : ').
 
 		indent : int, optional
-			The number of spaces to use in the indent of the JSON.
+			The number of spaces to use in the indent of the JSON. Default
+			is 4.
 
 		Returns
 		-------
@@ -991,12 +1123,13 @@ class Avocado(object):
 		Parameters
 		----------
 		name : str
-			The suffix of the name of the weights file.
+			The path prefix of the saved model. The weights are read from
+			`{name}.h5`, which is loaded in full as a Keras model.
 
 		verbose : int, optional
 			The verbosity level when loading weights. 0 means silent, 1 means
 			notify when a weight matrix has been set, 2 means notify what
-			action has been taken on each layer.
+			action has been taken on each layer. Default is 0.
 
 		Returns
 		-------
@@ -1033,7 +1166,19 @@ class Avocado(object):
 		"""Load a model that has been serialized to disk.
 
 		The keras model that is saved to disk does not contain any of the
-		wrapper information 
+		wrapper information, such as the names of the cell types and assays,
+		so it is read from the json file. This method builds an Avocado
+		object from the json file and then replaces its Keras model with the
+		one read from the h5 file. If the json file has no experiments list,
+		as in the pre-trained Roadmap and ENCODE-Core models on Zenodo,
+		`experiments` is empty.
+
+		The `freeze_*` arguments do not freeze any layer of the returned
+		model. They are stored on the Avocado object, but the Keras model
+		that the constructor builds with them is replaced by the one read from
+		the h5 file, whose layers keep the trainable flags they were saved
+		with. The stored values are used only when `fit_celltypes` or
+		`fit_assays` builds a replacement model.
 
 		Parameters
 		----------
@@ -1044,28 +1189,28 @@ class Avocado(object):
 			be loaded in.
 
 		freeze_celltypes : bool, optional
-			Whether to freeze the training of the cell type embedding. Default
-			is False.
+			Stored on the returned object but not applied to its layers; see
+			above. Default is False.
 
 		freeze_assays : bool, optional
-			Whether to freeze the training of the assay embeddings. Default
-			is False.
+			Stored on the returned object but not applied to its layers; see
+			above. Default is False.
 
 		freeze_genome_25bp : bool, optional
-			Whether to freeze the training of the 25 bp genome factors. Default
-			is False.
+			Stored on the returned object but not applied to its layers; see
+			above. Default is False.
 
 		freeze_genome_250bp : bool, optional
-			Whether to freeze the training of the 250 bp genome factors. Default
-			is False.
+			Stored on the returned object but not applied to its layers; see
+			above. Default is False.
 
 		freeze_genome_5kbp : bool, optional
-			Whether to freeze the training of the 5 kbp genome factors. Default
-			is False.
+			Stored on the returned object but not applied to its layers; see
+			above. Default is False.
 
 		freeze_network : bool, optional
-			Whether to freeze the training of the neural network. Default
-			is False.
+			Stored on the returned object but not applied to its layers; see
+			above. Default is False.
 
 		Returns
 		-------

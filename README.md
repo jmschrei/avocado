@@ -1,6 +1,6 @@
 ## avocado
 
-> **Deprecated.** This code base is no longer maintained, and version 0.4.1 is its final release. This release documents the code as it stands, pins the dependencies to versions that still work together, and lists the [known issues](#known-issues) instead of fixing them. Avocado is going to be completely refactored, and code written against this version may not work with the refactored package. If you depend on this version, pin it with `pip install avocado-epigenome==0.4.1`. The version history is in [CHANGELOG.md](CHANGELOG.md).
+> **Deprecated.** This code base is no longer maintained, and version 0.4.1 is its final release. This release documents the code as it stands, pins the dependencies to versions that still work together, and lists the [known issues](#known-issues) instead of fixing them. Avocado is going to be re-implemented as a simpler package. The re-implementation will be the same model conceptually, but it will not necessarily reproduce the outputs of this version exactly, and code written against this version may not work with it. If you depend on this version, pin it with `pip install avocado-epigenome==0.4.1`. The version history is in [CHANGELOG.md](CHANGELOG.md).
 
 <p align="center">
 	<img src="figures/Avocado-Schematic.png" width="650"/>
@@ -101,7 +101,7 @@ export KERAS_BACKEND=theano
 avocado-impute -p encode2018core -c J040 -a ChIP-seq_REST_signal_p-value -d cpu
 ```
 
-`-d cpu` runs the imputation on the CPU. The default, `-d cuda`, needs pygpu, which is not installed with this package (see [Known issues](#known-issues)). On the CPU, Theano used one core in testing, and predicting 100,000 bins (2.5 Mbp) of one experiment with the ENCODE Core or Roadmap model took about 100 seconds.
+`-d cpu` runs the imputation on the CPU. The default, `-d cuda`, needs pygpu, which is not installed with this package (see [Known issues](#known-issues)). On the CPU, Theano used one core in testing: predicting 100,000 bins (2.5 Mbp) of one experiment with the ENCODE Core or Roadmap model took about 100 seconds, and imputing all of chr21 with the ENCODE Core model took about 32 minutes.
 
 All cell types and assays that imputations can be made for can be found in the `cli` folder.
 
@@ -236,6 +236,7 @@ These are the known problems in version 0.4.1. They are documented here rather t
 **Downloads**
 
 - Four of the five models that `avocado-impute -m` names can no longer be downloaded from noble.gs.washington.edu (see [Pre-trained models](#pre-trained-models)). The imputations folder linked under Python Interface returns HTTP 403 as well.
+- Loading the pre-trained Roadmap and ENCODE Core models prints `UserWarning: Error in loading the saved optimizer state`. The optimizer state is used only for further training, and the models load and predict.
 - When a model download fails, `avocado-impute` does not stop. It prints the `wget` errors, creates the output bigWig, and then raises `OSError: Model file for chromosome chr1 not found.`, leaving a bigWig with a header and no values.
 
 **`avocado-impute`**

@@ -6,7 +6,7 @@ The project kept no changelog before 0.4.1. The entries for earlier versions wer
 
 ## [0.4.1] - 2026-10-18
 
-The final release of this code base. Avocado is going to be completely refactored, and this version is deprecated. It changes no code: it documents the package as it stands, pins the dependencies to versions that work together, and lists the known issues in the README rather than fixing them.
+The final release of this code base. Avocado is going to be re-implemented as a simpler package that is the same model conceptually but will not necessarily reproduce this version's outputs exactly, and this version is deprecated. It changes no code: it documents the package as it stands, pins the dependencies to versions that work together, and lists the known issues in the README rather than fixing them.
 
 ### Packaging
 

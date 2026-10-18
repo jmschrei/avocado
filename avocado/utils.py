@@ -5,6 +5,11 @@
 """
 This file defines useful utility functions, mostly for the processing of
 epigenomic data sets.
+
+On Python 3 this module cannot be imported. The module-level `chroms` list is
+built with `range(1, 23) + ['X']`, which raises a TypeError there because
+`range` no longer returns a list. `import avocado` does not import this
+module, so the rest of the package is unaffected.
 """
 
 import numpy
@@ -17,7 +22,48 @@ chroms = range(1, 23) + ['X']
 
 def download_bigWig(url, download_filepath='.', chroms=chroms, 
 	chrom_lengths=None, verbose=True):
-	"""Documentation."""
+	"""Download a bigWig and convert it to one 25 bp resolution array per chromosome.
+
+	This function shells out to `wget` to download `url` into
+	`download_filepath`, then, for each chromosome, runs the UCSC tool
+	`bigWigToBedGraph` to extract that chromosome into a bedgraph in the
+	current working directory, reads it with `bedgraph_to_dense`, averages
+	it into 25 bp bins with `decimate_vector`, and deletes the bedgraph.
+	`wget` and `bigWigToBedGraph` must be on the PATH, and the commands are
+	run with `os.system`, so a failure in either is not raised.
+
+	This function does not return. After the last chromosome it refers to the
+	undefined name `bigWig` (the variable is `bigwig`), so it raises a
+	NameError, and the downloaded bigWig is not deleted. Passing
+	`chrom_lengths` raises a NameError earlier, because the padding step
+	refers to the undefined name `chromosome_lengths`.
+
+	Parameters
+	----------
+	url : str
+		The URL of the bigWig file to download.
+
+	download_filepath : str, optional
+		The directory to download the bigWig into. Default is '.'.
+
+	chroms : list, optional
+		The chromosomes to extract, without the 'chr' prefix. Default is
+		chromosomes 1 through 22 and X.
+
+	chrom_lengths : list or None, optional
+		The number of 25 bp bins to pad each chromosome's array to, in the
+		order of chromosomes 1 through 22 and then X. Default is None.
+
+	verbose : bool, optional
+		Whether to print each command before it is run and to show a progress
+		bar while reading each bedgraph. Default is True.
+
+	Returns
+	-------
+	chrom_data : list of numpy.ndarray
+		One array per chromosome in `chroms`, holding the mean signal in each
+		25 bp bin. This value is never reached; see above.
+	"""
 
 	if verbose == True:
 		print("wget -nv -q {} -P {}/".format(url, download_filepath))
